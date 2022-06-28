@@ -39,6 +39,8 @@ class Automata:
 
 
 class State:
+    transitions = tuple[int, str] # to and read
+    links = list[transitions] #list of states that this state is linked to
 
     def __init__(self, id: int, name: str, x: int, y: int, initial: bool = None, final: bool = None):
         self.id = id
@@ -99,9 +101,18 @@ class deterministic_finite_automaton:
     def step(self, input_sybol: str, transition: Transition):
         pass
 
-    def validate_automaton(): #returns true if automaton is correct.
-        #check only one initial state
+    def validate_automaton(self): #checks to see if automaton can run
+        #check if there is an initial state
+        response = []
+        for state in self.states:
+            if state.inital:
+                break
+
         #check there is atleast one final state
+        for state in self.states:
+            if state.inital:
+                break
+
         pass
 
 class input_string():
