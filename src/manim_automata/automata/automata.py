@@ -39,7 +39,9 @@ class Automata:
 
 
 class State:
-    def __init__(self, name: str, x: int, y: int, initial: bool, final: bool):
+
+    def __init__(self, id: int, name: str, x: int, y: int, initial: bool = None, final: bool = None):
+        self.id = id
         self.name = name
         self.x = x
         self.y = y
@@ -48,30 +50,41 @@ class State:
         #need some logic here for initial and final
 
 class Transition:
-    input_symbols = list[str]
-    transition_link = tuple[int]
+    # input_symbols = list[str]
+    # transition_link = tuple[int]
+    def __init__(self, transition_from: int, transition_to: int, input_symbols: str):
+        self.transition_from = transition_from
+        self.transition_to = transition_to
+        self.input_symbols = input_symbols
 
-    def __init__(self, transition: transition_link, read: input_symbols):
-        self.transition = transition
-        self.read = read
-
-    def transition(self):
-        pass
+    # def transition(self):
+    #     pass
 
 
-class deterministic_finite_automaton():
+class deterministic_finite_automaton:
     states = []
     transitions = []
 
-    def __init__(self, template):
+    def __init__(self, template=None, states=None, transitions=None):
+        if template:
+            pass
+        else:
+            for state in states: #create states
+                self.add_state(state)
 
-        pass
+            for transition in transitions: #create transitions
+                self.add_transition(transition)
 
-    def add_transition(self, transition: Transition):
-        self.transitions.append(transition)
 
-    def add_state(self, state: State):
-        self.states.append(state)
+    def add_transition(self, transition: dict):
+        #validate transition before adding
+        #maybe process read to be a list instead of a string, might make things easier?
+        self.transitions.append(Transition(int(transition["from"]), int(transition["to"]), transition["read"]))
+
+    def add_state(self, state: dict):
+        #check if initial is set in state
+        #check if final exist in state
+        self.states.append(State(state["@id"], state["@name"], state["x"], state["y"]))
 
     def run(self, input_string: list[str]):
         validation_response = self.validate_automaton() #returns tuple (bool, message)

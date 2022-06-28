@@ -36,16 +36,14 @@ if __name__ == "__main__":
     states = json_dictionary["structure"]["automaton"]["state"]
     transitions = json_dictionary["structure"]["automaton"]["transition"]
 
-    print(states)
-    print(transitions)
 
-    for state in states:
-        #create states
-        pass
+    deterministic_finite_automaton = deterministic_finite_automaton(states=states, transitions=transitions)
 
-    for transition in transitions:
-        #create transitions
-        pass
+
+    # print(states)
+    # print(transitions)
+
+    
 
     # print(list(find_key_in_dictionary(json_dictionary, "transition")))
     # print(list(gen_dict_extract("transition", json_dictionary)))
