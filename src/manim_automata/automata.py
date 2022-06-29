@@ -3,7 +3,7 @@ from xmlrpc.client import boolean
 
 class Automata:
     """
-    Abstarct class providing attributes and methods for automatas
+    Abstract class providing attributes and methods for automatas
 
     ...
 
@@ -150,3 +150,10 @@ class alphabet():
 
 
 
+
+
+from manim.mobject.mobject import Mobject
+from manim.mobject.types.vectorized_mobject import VMobject
+
+class RubiksCube(VMobject):
+    pass

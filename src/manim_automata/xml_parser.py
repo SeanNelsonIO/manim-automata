@@ -1,4 +1,3 @@
-from ast import JoinedStr
 import json
 import xmltodict
 
@@ -23,8 +22,6 @@ def create_automaton_from_dictionary(dictionary):
 
 
 
-
-
 if __name__ == "__main__":
 
     #testing functions
@@ -39,6 +36,19 @@ if __name__ == "__main__":
     # print(transitions)
 
     deterministic_finite_automaton = deterministic_finite_automaton(states=states, transitions=transitions)
+
+def initialise_automaton():
+    #testing functions
+    json_dictionary = parse_xml_file('testmachine.jff')
+    if not isinstance(json_dictionary, dict):
+        exit()
+
+
+    states = json_dictionary["structure"]["automaton"]["state"]
+    transitions = json_dictionary["structure"]["automaton"]["transition"]
+
+
+    return deterministic_finite_automaton(states=states, transitions=transitions)
 
 
     # print(states)
