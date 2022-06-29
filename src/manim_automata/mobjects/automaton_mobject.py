@@ -30,9 +30,11 @@ class State(VMobject):
        
         q0 = self.initial_state(self.state(Text('q0')))
 
-        q1 = self.final_state(Text('q1')).shift(RIGHT * 2)
+        q1 = self.final_state(self.state(Text('q1'))).shift(RIGHT * 3)
 
-        self.add(q0, q1)
+        q2 = self.state(Text('q2')).shift(RIGHT  * 6)
+
+        self.add(q0, q1, q2)
         # self.final_state(Text('q1'))
         # self.state_grid = VGroup(state, name)
         # arrow = Arrow(buff=0.5, start=4 * LEFT, end=LEFT * 0.5)
@@ -47,10 +49,9 @@ class State(VMobject):
         initial_state = VGroup(arrow, state)
         return initial_state
 
-    def final_state(self, name):
-        state = Circle(radius=0.7)
-        state_outer = Circle(radius=0.9)
-        final_state = VGroup(state, state_outer, name)
+    def final_state(self, state):
+        state_outer = Circle(radius=state.width*0.6)
+        final_state = VGroup(state, state_outer)
         return final_state
 
     def state(self, name):
