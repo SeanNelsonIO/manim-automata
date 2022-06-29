@@ -4,7 +4,6 @@ from xmlrpc.client import boolean
 class Automata:
     """
     Abstract class providing attributes and methods for automatas
-
     ...
 
     Attributes
@@ -39,7 +38,6 @@ class Automata:
 
 
 class State:
-
     def __init__(self, id: int, name: str, x: int, y: int, initial: bool = None, final: bool = None):
         self.id = id
         self.name = name
@@ -50,40 +48,40 @@ class State:
 
         #list of states that this state is linked to
         self.links = []
-        
-
-
-        #need some logic here for initial and final
 
     def add_transition(self, transition_to, read_symbols):
-        self.links.append((transition_to, read_symbols))
+        self.links.append(Transition(self.id, transition_to, read_symbols))
+
+    def get_transitions(self):
         pass
 
-# class Transition:
-#     # input_symbols = list[str]
-#     # transition_link = tuple[int]
-#     def __init__(self, transition_from: int, transition_to: int, input_symbols: str):
-#         self.transition_from = transition_from
-#         self.transition_to = transition_to
-#         self.input_symbols = input_symbols
+    def __str__(self) -> str:
+        return 'State id: {self.id}, name: {self.name}'.format(self=self)
 
-#     # def transition(self):
-#     #     pass
+class Transition:
+
+    def __init__(self, transition_from: State, transition_to: State, input_symbol: str):
+        self.transition_from = transition_from
+        self.transition_to = transition_to
+        self.input_symbol = input_symbol
+
+        #when creating a transition add the transition to the states
+
 
 
 class deterministic_finite_automaton:
     states = []
-    # transitions = []
+    transitions = []
 
     def __init__(self, template=None, states=None, transitions=None):
         if template:
-            pass
+            pass #extract states and transitions from template if valid
         else:
             for state in states: #create states
                 self.add_state(state)
 
             self.add_transitions(transitions)
-
+        
 
     def add_state(self, state: dict):
         #check if initial is set in state
@@ -106,12 +104,82 @@ class deterministic_finite_automaton:
     def add_transitions(self, transitions: list[dict]): #function slow, REFACTOR!
         #go through each transition, fetch the corresponding state and add the transition to state
         for transition in transitions:
-            # fetch from state
+            #get states
+            from_state = None
+            to_state = None
+            transition_symbols = transition['read']
+
             for state in self.states:
                 if state.id == transition['from']:
-                    # create transition on state
-                    state.add_transition(transition['to'], transition['read'])
-                    break
+                    from_state = state
+                if state.id == transition['to']:
+                    to_state = state
+
+            if from_state and to_state: #if states exist create transition
+                self.transitions.append(Transition(from_state, to_state, transition_symbols))
+
+    def run(self, input_string: str):
+        current_state = self.get_initial_state() #initial state is the first state in sequence
+        current_transitions = current_state.get_transitions()
+        for transition in current_transitions:
+            current_state = self.step(input_string, current_transitions, current_state)
+        
+
+
+        #need to define the branches and accept
+        if current_state.final == True:
+            return True
+        return False #The last state was not a final state, therefore the string is rejected.
+
+
+
+        # current_state = self.get_initial_state() #initial state is the first state in sequence
+        # for i in range(len(input_string)): #iterate through inputs
+            # get transitions of current state
+            # current_transitions = current_state.get_transitions()
+
+
+            # pass transitions to step function
+            # get the next state from step function
+
+            # current_state = self.step(input_string[i], current_transitions, current_state)
+        
+
+            # #consume token
+            # if input_string == 1:
+            #     input_string = ''
+            #     break
+            # else:
+            #     input_string = input_string[i:]
+            # if i == input_string: #once all the tokens have been consumed stop running.
+            #     break
+
+        #check if the current state is a final state
+        
+            
+
+    def step(self, input_token: str, transitions: Transition, current_state: State):
+        
+        for transition in transitions:
+            if transition.input_symbol == input_token:
+                pass
+
+
+        pass
+
+    def get_initial_state(self):
+        for state in self.states:
+            if state.initial == True:
+                return state
+
+        #create error message here - need to look up standard.
+
+    def generate_transition_branches(self): #this seams like a NFA
+        #Some input_strings may create different branches as a state may have mulitple transitions
+        #where the transitions consume variable lengths of the input string, resulting in branches
+        #These branches will execute different paths, where the String is accepted.
+        # do this count as non-determinism? ask Sam
+        pass
 
     # def run(self, input_string: list[str]):
     #     validation_response = self.validate_automaton() #returns tuple (bool, message)
@@ -139,21 +207,14 @@ class deterministic_finite_automaton:
 
         pass
 
-class input_string():
-    pass
+# class InputString():
+#     input_string = str #the input string itself
+#     stride = int #defined by transition
+#     pass
 
 
-class alphabet():
-    pass
+# class alphabet():
+#     pass
 
+#could define an alphabet to make the choise of symbols easier.
 
-
-
-
-
-
-from manim.mobject.mobject import Mobject
-from manim.mobject.types.vectorized_mobject import VMobject
-
-class RubiksCube(VMobject):
-    pass
