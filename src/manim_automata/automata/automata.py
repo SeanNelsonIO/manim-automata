@@ -87,8 +87,21 @@ class deterministic_finite_automaton:
 
     def add_state(self, state: dict):
         #check if initial is set in state
+        initial = False
+        final = False
+        if 'initial' in state.keys():
+            initial = True 
+            #check to see if there is already another initial state
+            for state_object in self.states:
+                if state_object.initial == True: #If there already exists an initial state set back to False and keep first initial state
+                    initial = False
+            
+        if 'final' in state.keys():
+            final = True
+
+
         #check if final exist in state
-        self.states.append(State(state["@id"], state["@name"], state["x"], state["y"]))
+        self.states.append(State(state["@id"], state["@name"], state["x"], state["y"], initial=initial, final=final))
 
     def add_transitions(self, transitions: list[dict]): #function slow, REFACTOR!
         #go through each transition, fetch the corresponding state and add the transition to state
@@ -100,13 +113,13 @@ class deterministic_finite_automaton:
                     state.add_transition(transition['to'], transition['read'])
                     break
 
-    def run(self, input_string: list[str]):
-        validation_response = self.validate_automaton() #returns tuple (bool, message)
-        if validation_response[0] == False:
-            return validation_response[1]
+    # def run(self, input_string: list[str]):
+    #     validation_response = self.validate_automaton() #returns tuple (bool, message)
+    #     if validation_response[0] == False:
+    #         return validation_response[1]
         
-        for symbol in input_string:
-            self.step(symbol)
+    #     for symbol in input_string:
+    #         self.step(symbol)
 
     
     # def step(self, input_sybol: str, transition: Transition):
