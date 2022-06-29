@@ -36,6 +36,7 @@ if __name__ == "__main__":
     states = json_dictionary["structure"]["automaton"]["state"]
     transitions = json_dictionary["structure"]["automaton"]["transition"]
 
+    # print(transitions)
 
     deterministic_finite_automaton = deterministic_finite_automaton(states=states, transitions=transitions)
 
