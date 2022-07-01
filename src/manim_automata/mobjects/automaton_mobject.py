@@ -28,10 +28,10 @@ class ManimAutomaton(VMobject):
 
         
             
-        count = -6
-        for key in self.manim_states:
-            self.add(self.manim_states[key].shift(RIGHT * count))
-            count = count + 4
+        # count = -6
+        # for key in self.manim_states:
+        #     self.add(self.manim_states[key].shift(RIGHT * count))
+        #     count = count + 4
             # self.add(state)
 
         for transition in automaton.transitions:
@@ -42,9 +42,31 @@ class ManimAutomaton(VMobject):
 
             self.manim_transitions.append(manim_transition)
 
-        for transition in self.manim_transitions:
-            self.add(transition)
-        
+        # for transition in self.manim_transitions:
+        #     self.add(transition)
+
+        # a = ArcPolygon(ORIGIN, RIGHT + 3, [0, 2, 0], radius=6)
+        # a = Arc(angle=PI*1.9, radius=-1)
+        # a.add_tip()
+        # self.add(a)
+        # vertices = [
+        #     [0, 0, 0],
+        #     [0, 1, 2],
+        #     [1, 0, 1],
+        #     [0, 0, 0]
+        # ]
+        # cubic_bezier = CubicBezier(points=vertices)
+        # self.add(cubic_bezier)
+        p1 = np.array([-3, 1, 0])
+        p1b = p1 + [1, 0, 0]
+        d1 = Dot(point=p1).set_color(BLUE)
+        l1 = Line(p1, p1b)
+        p2 = np.array([3, -1, 0])
+        p2b = p2 - [1, 0, 0]
+        d2 = Dot(point=p2).set_color(RED)
+        l2 = Line(p2, p2b)
+        bezier = CubicBezier(ORIGIN, RIGHT + 2, 3 * RIGHT, ORIGIN)
+        self.add(bezier)
 
     def create_initial_state(self, state):
         arrow = Arrow(buff=0.5, start=4 * LEFT, end=LEFT * 0.5)
