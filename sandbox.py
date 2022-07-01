@@ -11,6 +11,10 @@ class CreateCircle(Scene):
         # dot_grid.update_dot()
         # self.play(Create(dot_grid))  # show the circle on screen
 
+        for x in range(-7, 8):
+            for y in range(-4, 5):
+                self.add(Dot(np.array([x, y, 0]), color=DARK_GREY))
+
 
         state = State()
         self.play(Create(state))

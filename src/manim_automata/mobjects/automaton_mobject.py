@@ -1,3 +1,4 @@
+from cProfile import label
 from manim import *
 from src.manim_automata.automata import deterministic_finite_automaton
 
@@ -32,9 +33,13 @@ class State(VMobject):
 
         q1 = self.final_state(self.state(Text('q1'))).shift(RIGHT * 3)
 
+        transition1 = self.transition(q0, q1, label="1")
+
         q2 = self.state(Text('q2')).shift(RIGHT  * 6)
 
-        self.add(q0, q1, q2)
+        transition2 = self.transition(q1, q2, label="0")
+
+        self.add(q0, transition1, q1, transition2, q2)
         # self.final_state(Text('q1'))
         # self.state_grid = VGroup(state, name)
         # arrow = Arrow(buff=0.5, start=4 * LEFT, end=LEFT * 0.5)
@@ -51,17 +56,23 @@ class State(VMobject):
 
     def final_state(self, state):
         state_outer = Circle(radius=state.width*0.6)
-        final_state = VGroup(state, state_outer)
+        final_state = VGroup(state_outer, state)
         return final_state
 
     def state(self, name):
         state = VGroup(Circle(radius=0.9), name)
         return state
+
+    def transition(self, start_state, end_state, label=None):
+        transition = Arrow(start_state, end_state, buff=0)
         
+        if label: #if the tranistion is given a label (input symbols)
+            text = Text(label)
+            text.next_to(transition, direction=UP, buff=0)
+            transition = VGroup(transition, text)
 
-
-    def transition():
-        pass
+        return transition
+        
 
 
 
