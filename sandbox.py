@@ -1,6 +1,9 @@
 from manim import *
+# from manim_automata.automata import Automata
+# from manim_automata.mobjects.automaton_mobject import ManimAutomaton
 # from src.manim-automata import *
 from src.manim_automata.mobjects import *
+from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton
 
 class CreateCircle(Scene):
     def construct(self):
@@ -16,6 +19,7 @@ class CreateCircle(Scene):
                 self.add(Dot(np.array([x, y, 0]), color=DARK_GREY))
 
 
-        state = State()
-        self.play(Create(state))
+        # state = State()
+        automaton = ManimAutomaton()
+        self.play(Create(automaton))
         self.wait()

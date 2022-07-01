@@ -1,5 +1,5 @@
 from xmlrpc.client import boolean
-
+from .xml_parser import parse_xml_file
 
 class Automata:
     """
@@ -73,14 +73,29 @@ class deterministic_finite_automaton:
     states = []
     transitions = []
 
-    def __init__(self, template=None, states=None, transitions=None):
+    def __init__(self, template=None, states=None, transitions=None, xml_file=None):
         if template:
             pass #extract states and transitions from template if valid
-        else:
+        elif xml_file:
+            json_dictionary = parse_xml_file(xml_file)
+            if not isinstance(json_dictionary, dict):
+                exit()
+
+            states = json_dictionary["structure"]["automaton"]["state"]
+            transitions = json_dictionary["structure"]["automaton"]["transition"]
+
             for state in states: #create states
                 self.add_state(state)
 
             self.add_transitions(transitions)
+
+        elif states and transitions:
+            for state in states: #create states
+                self.add_state(state)
+
+            self.add_transitions(transitions)
+        
+        else: return False
         
 
     def add_state(self, state: dict):

@@ -1,17 +1,89 @@
-from cProfile import label
 from manim import *
 from src.manim_automata.automata import deterministic_finite_automaton
 
 __all__ = ["State"]
 
 
-class finite_automaton(VMobject):
-    
-    def __init__(self, automata_templete: dict):
-        super().__init__()
-        pass
-        # deterministic_finite_automaton(template=automata_templete)
+class ManimAutomaton(VMobject):
 
+    manim_states = {}
+    manim_transitions = []
+    
+    def __init__(self, automata_templete=None):
+        super().__init__()
+        if automata_templete:
+            pass
+        #composite relationship
+        automaton = deterministic_finite_automaton(xml_file='testmachine.jff')
+
+        #build the visualisation of the automaton
+        for state in automaton.states:
+            manim_state = self.create_state(state.name)
+            if state.initial:
+                manim_state = self.create_initial_state(manim_state)
+            if state.final:
+                manim_state = self.create_final_state(manim_state)
+
+            self.manim_states[state.name] = manim_state
+
+        
+            
+        count = -6
+        for key in self.manim_states:
+            self.add(self.manim_states[key].shift(RIGHT * count))
+            count = count + 4
+            # self.add(state)
+
+        for transition in automaton.transitions:
+            manim_state_from = self.manim_states[transition.transition_from.name] #lookup manim state using dict
+            manim_state_to = self.manim_states[transition.transition_to.name] #lookup manim state using dict
+
+            manim_transition = self.create_transition(manim_state_from, manim_state_to, transition.input_symbol)
+
+            self.manim_transitions.append(manim_transition)
+
+        for transition in self.manim_transitions:
+            self.add(transition)
+        
+
+    def create_initial_state(self, state):
+        arrow = Arrow(buff=0.5, start=4 * LEFT, end=LEFT * 0.5)
+        initial_state = VGroup(arrow, state)
+        return state # need to fix arrow to state
+
+    def create_final_state(self, state):
+        state_outer = Circle(radius=state.width*0.6)
+        final_state = VGroup(state_outer, state)
+        return final_state
+
+    def create_state(self, label):
+        state = VGroup(Circle(radius=0.9), Text(label))
+        return state
+
+    def create_transition(self, start_state, end_state, label=None):
+        transition = Arrow(start_state, end_state, buff=0)
+        
+        if label: #if the tranistion is given a label (input symbols)
+            text = Text(label)
+            text.next_to(transition, direction=UP, buff=0)
+            transition = VGroup(transition, text)
+
+        return transition
+    
+    
+    #need to create a transition function that transitions to itself
+    def create_reflextive_transition(): #change name of this!
+        pass
+
+    def generate_manim_states():
+        pass
+
+
+    def generate_automaton(): 
+        #creates a visual representation of automaton using template or automata object
+        pass
+
+    
 
         
 
@@ -73,6 +145,7 @@ class State(VMobject):
 
         return transition
         
+    
 
 
 

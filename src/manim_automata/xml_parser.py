@@ -1,7 +1,7 @@
 import json
 import xmltodict
 
-from automata import deterministic_finite_automaton
+# from automata import deterministic_finite_automaton
 
 def parse_xml_file(file_name):
     """
@@ -39,16 +39,16 @@ if __name__ == "__main__":
 
 def initialise_automaton():
     #testing functions
-    json_dictionary = parse_xml_file('testmachine.jff')
-    if not isinstance(json_dictionary, dict):
-        exit()
+    # json_dictionary = parse_xml_file('testmachine.jff')
+    # if not isinstance(json_dictionary, dict):
+    #     exit()
 
 
-    states = json_dictionary["structure"]["automaton"]["state"]
-    transitions = json_dictionary["structure"]["automaton"]["transition"]
+    # states = json_dictionary["structure"]["automaton"]["state"]
+    # transitions = json_dictionary["structure"]["automaton"]["transition"]
 
 
-    return deterministic_finite_automaton(states=states, transitions=transitions)
+    return deterministic_finite_automaton(xml_file='testmachine.jff')
 
 
     # print(states)
