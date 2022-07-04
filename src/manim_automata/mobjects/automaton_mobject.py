@@ -18,7 +18,7 @@ class ManimAutomaton(VMobject):
 
         #build the visualisation of the automaton
         for state in automaton.states:
-            manim_state = self.create_state(state.name)
+            manim_state = self.create_state(state.name, state.x, state.y)
             if state.initial:
                 manim_state = self.create_initial_state(manim_state)
             if state.final:
@@ -27,10 +27,11 @@ class ManimAutomaton(VMobject):
             self.manim_states[state.name] = manim_state
 
     
-        count = -6
+        # count = -6
         for key in self.manim_states:
-            self.add(self.manim_states[key].shift(RIGHT * count))
-            count = count + 4
+            # self.add(self.manim_states[key].shift(RIGHT * count))
+            self.add(self.manim_states[key])
+            # count = count + 4
             # self.add(state)
 
         for transition in automaton.transitions:
@@ -51,12 +52,32 @@ class ManimAutomaton(VMobject):
         return state # need to fix arrow to state
 
     def create_final_state(self, state):
-        state_outer = Circle(radius=state.width*0.6)
-        final_state = VGroup(state_outer, state)
-        return final_state
+        # state_outer = Circle(radius=state.width*0.6)
+        # final_state = VGroup(state_outer, state)
+        # return final_state
+        return state
 
-    def create_state(self, label):
-        state = VGroup(Circle(radius=0.9), Text(label))
+    def create_state(self, label: str, x: float, y: float):
+        circle = Circle(radius=0.3)
+        
+
+        # circle = Circle(radius=0.5)
+        # circle.set_x(1)
+        # circle.set_y(1)
+
+        # circle1 = Circle(radius=0.5)
+        # circle1.set_x(5)
+        # circle1.set_y(5)
+
+
+
+
+
+        state = VGroup(circle, Text(label, font_size=30))
+        state.set_x(float(x)/100)
+        state.set_y(float(y)/100)
+        
+
         return state
 
     def create_transition(self, start_state, end_state, label=None):
@@ -66,7 +87,7 @@ class ManimAutomaton(VMobject):
             transition = Arrow(start_state, end_state, buff=0)
         
         if label: #if the tranistion is given a label (input symbols)
-            text = Text(label)
+            text = Text(label, font_size=30)
             text.next_to(transition, direction=UP, buff=0)
             transition = VGroup(transition, text)
 
