@@ -3,8 +3,8 @@
 	<automaton>
 		<!--The list of states.-->
 		<state id="0" name="q0">
-			<x>24640.0</x>
-			<y>21780.0</y>
+			<x>0.0</x>
+			<y>0.0</y>
 		</state>
 		<state id="1" name="q1">
 			<x>92.0</x>
@@ -27,14 +27,14 @@
 			<read>0</read>
 		</transition>
 		<transition>
-			<from>2</from>
-			<to>3</to>
-			<read>0</read>
-		</transition>
-		<transition>
 			<from>1</from>
 			<to>2</to>
 			<read>1</read>
+		</transition>
+		<transition>
+			<from>2</from>
+			<to>3</to>
+			<read>0</read>
 		</transition>
 	</automaton>
 </structure>

@@ -16,6 +16,28 @@ class ManimAutomaton(VMobject):
         #composite relationship
         automaton = deterministic_finite_automaton(xml_file='testmachine.jff')
 
+        
+        #calculate origin shift and normalise coordinates to manim coordinate system
+        for state in automaton.states:
+            #get the inital state (this should be set)
+            if state.initial:
+                self.initial_state = state
+                #store original values, used to normalise coordinates
+                self.origin_offset_x = float(state.x)
+                self.origin_offset_y = float(state.y)
+                break
+        
+        for state in automaton.states: #may need to take absolute values to prevent negative values (review)
+            #normalise coordinates by subtracting offsets
+            state.x = float(state.x) - self.origin_offset_x
+            state.y = float(state.y) - self.origin_offset_y
+    
+
+        #calculate new positions for states to optimally position them in scene
+        # self.position_states(automaton.states)
+            
+
+
         #build the visualisation of the automaton
         for state in automaton.states:
             manim_state = self.create_state(state.name, state.x, state.y)
@@ -52,31 +74,21 @@ class ManimAutomaton(VMobject):
         return state # need to fix arrow to state
 
     def create_final_state(self, state):
-        # state_outer = Circle(radius=state.width*0.6)
-        # final_state = VGroup(state_outer, state)
-        # return final_state
+        state_outer = Circle(radius=state.width*0.4)
+        # state_outer.set_x(state.get_x())
+        # state_outer.set_y(state.get_y())
+        # self.add(state_outer)
+        final_state = VGroup(state, state_outer)
+        return final_state
         return state
 
     def create_state(self, label: str, x: float, y: float):
-        circle = Circle(radius=0.3)
-        
-
-        # circle = Circle(radius=0.5)
-        # circle.set_x(1)
-        # circle.set_y(1)
-
-        # circle1 = Circle(radius=0.5)
-        # circle1.set_x(5)
-        # circle1.set_y(5)
-
-
-
-
-
+        circle = Circle(radius=0.5)
         state = VGroup(circle, Text(label, font_size=30))
-        state.set_x(float(x)/100)
-        state.set_y(float(y)/100)
-        
+
+        state.set_x(float(x)/30)
+        state.set_y(float(y)/30)
+
 
         return state
 
@@ -92,6 +104,23 @@ class ManimAutomaton(VMobject):
             transition = VGroup(transition, text)
 
         return transition
+
+    # def position_states(self, states): #algorithm to position states in scene
+    #     for state in states: #find initial state
+    #         if state.initial:
+    #             initial_state = state
+    #             #set position of initial state to origin
+    #             initial_state.x = 0
+    #             initial_state.y = 0
+    #             break
+        
+    #     #create hiarchy of levels
+
+    #     #create create hiarchy within levels (most valuable goes higher)
+
+        
+
+
     
     def create_bezier(self):
            #     self.add(transition)

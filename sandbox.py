@@ -26,10 +26,9 @@ class CreateCircle(MovingCameraScene):
         # self.play(Create(automaton))
 
         self.play(
-            Create(automaton.shift([-1, -1, 0])), #vector that shifts automaton to centre of scene
-            self.camera.frame.animate.scale(.5)
+            Create(automaton), #vector that shifts automaton to centre of scene
+            # self.camera.frame.animate.scale(.5)
         )
 
         self.wait()
 
-        
