@@ -1,5 +1,6 @@
 from enum import auto
 from manim import *
+from manim_automata.automata import Transition
 # from manim_automata.automata import Automata
 # from manim_automata.mobjects.automaton_mobject import ManimAutomaton
 # from src.manim-automata import *
@@ -22,13 +23,103 @@ class CreateCircle(MovingCameraScene):
         # self.camera_frame.save_state()
 
         # state = State()
-        automaton = ManimAutomaton()
+        self.manim_automaton = ManimAutomaton()
         # self.play(Create(automaton))
 
+
+        # automaton.play_string("1010010010")
+        
+
+            
         self.play(
-            Create(automaton), #vector that shifts automaton to centre of scene
+            Create(self.manim_automaton), #vector that shifts automaton to centre of scene
             # self.camera.frame.animate.scale(.5)
         )
+        
+        
+        # input_string = ["0", "1", "0", "0", "1", "0"]
+        input_string = "10101010"
+        if self.play_string(input_string) is False:
+            self.play(Create(Text("REJECTED").shift((DOWN*3))))
+        else:
+            self.play(Create(Text("Accepted").shift((DOWN*3))))
 
-        self.wait()
+        self.wait(1)
+
+    def play_string(self, string: str):
+        #create manim objects of tokens
+        manim_tokens = []
+        spacing = 0
+        for token in string:
+            manim_tokens.append(Text(token, font_size=40).shift((DOWN*2) + [spacing, 0, 0]))
+            spacing = spacing + 0.5
+
+
+
+        #display string
+        for token in manim_tokens:
+            self.add(token)
+            
+
+
+
+        #Points to the current state
+        state_pointer = self.manim_automaton.get_initial_state()
+        #animate the automaton going through the sequence
+        for i, token in enumerate(manim_tokens):
+            #check if it is last token
+            if i == len(manim_tokens)-1:
+                #animate for the final state
+                pass
+            
+            step_result, next_state = self.manim_automaton.automaton.step(token, state_pointer)
+            self.animate_step(token, state_pointer, step_result)
+            
+            #if successful point to the next state
+            if step_result is True:
+                #move state_pointer to next state
+                if next_state:
+                    state_pointer = next_state
+            else:
+                return False
+            #if not then reject string
+
+        return True
+
+
+    def animate_step(self, token: str, state_pointer, result: bool):
+
+        first_transition = self.manim_automaton.manim_transitions[0]
+
+        manim_transition = self.manim_automaton.get_manim_transition(state_pointer.get_transition(0))
+        
+        # first_transition.add_updater([1, 1, 0])
+        # self.play()
+        # d1 = Dot().set_color(ORANGE)
+        # l1 = Line(LEFT, RIGHT)
+        # l2 = VMobject()
+        # self.add(d1, l1, l2)
+        # l2.add_updater(lambda x: x.become(Arrow(LEFT, d1.get_center()).set_color(ORANGE)))
+        # self.play(MoveAlongPath(d1, l1), rate_func=linear)
+
+        # self.play(token.animate.)
+
+    
+        self.play(
+            Transform(token, manim_transition)
+        )
+
+        self.remove(token) # removes the token once it has transformed
+
+        if result is True:
+            self.play(
+                first_transition.animate.set_color(GREEN) # create a custom animation to signify result
+            )
+        else:
+            self.play(
+                first_transition.animate.set_color(RED) # create a custom animation to signify result
+            )
+            
+        return result
+
 

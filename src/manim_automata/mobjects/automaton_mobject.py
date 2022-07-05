@@ -1,9 +1,26 @@
-from os import stat
 from manim import *
-from src.manim_automata.automata import deterministic_finite_automaton
+from src.manim_automata.automata import deterministic_finite_automaton, Transition, State
 
 __all__ = ["State"]
 
+
+class ManimTransition(VMobject):
+    def __init__(self, transition, start_state, end_state, label=None):
+        super().__init__()
+
+        self.transition = transition
+
+        if start_state == end_state: #create transition that points to itself
+            self.arrow = Arrow([-1, 2, 0], start_state, buff=0) #refactor this to look better
+        else: #start_state ----> end_state
+            self.arrow = Arrow(start_state, end_state, buff=0)
+        
+        if label: #if the tranistion is given a label (input symbols)
+            self.text = Text(label, font_size=30)
+            self.text.next_to(self.arrow, direction=UP, buff=0)
+            self.edge = VGroup(self.arrow, self.text)
+
+        self.add(self.edge)
 
 class ManimAutomaton(VMobject):
 
@@ -15,11 +32,10 @@ class ManimAutomaton(VMobject):
         if automata_templete:
             pass
         #composite relationship
-        automaton = deterministic_finite_automaton(xml_file='testmachine.jff')
-
+        self.automaton = deterministic_finite_automaton(xml_file='testmachine.jff')
         
         #calculate origin shift and normalise coordinates to manim coordinate system
-        for state in automaton.states:
+        for state in self.automaton.states:
             #get the inital state (this should be set)
             if state.initial:
                 self.initial_state = state
@@ -28,53 +44,40 @@ class ManimAutomaton(VMobject):
                 self.origin_offset_y = float(state.y)
                 break
         
-        for state in automaton.states: #may need to take absolute values to prevent negative values (review)
+        for state in self.automaton.states: #may need to take absolute values to prevent negative values (review)
             #normalise coordinates by subtracting offsets
             state.x = float(state.x) - self.origin_offset_x
             state.y = float(state.y) - self.origin_offset_y
-    
 
-        #calculate new positions for states to optimally position them in scene
-        # self.position_states(automaton.states)
             
-
-
         #build the visualisation of the automaton
-        for state in automaton.states:
-            manim_state = self.create_state(state.name, state.x, state.y)
+        for state in self.automaton.states:
+            manim_state = self.create_manim_state(state.name, state.x, state.y)
             if state.initial:
-                manim_state = self.create_initial_state(manim_state)
+                manim_state = self.create_manim_initial_state(manim_state)
             if state.final:
-                manim_state = self.create_final_state(manim_state)
+                manim_state = self.create_manim_final_state(manim_state)
 
             self.manim_states[state.name] = manim_state
-
+            self.add(manim_state)
     
-        # count = -6
-        for key in self.manim_states:
-            # self.add(self.manim_states[key].shift(RIGHT * count))
-            self.add(self.manim_states[key])
-            # count = count + 4
-            # self.add(state)
-
-        for transition in automaton.transitions:
+        for transition in self.automaton.transitions:
             manim_state_from = self.manim_states[transition.transition_from.name] #lookup manim state using dict
             manim_state_to = self.manim_states[transition.transition_to.name] #lookup manim state using dict
 
-            manim_transition = self.create_transition(manim_state_from, manim_state_to, transition.input_symbol)
-
+            manim_transition = ManimTransition(transition, manim_state_from, manim_state_to, transition.input_symbol)
             self.manim_transitions.append(manim_transition)
 
-        for transition in self.manim_transitions:
-            self.add(transition)
+        for manim_transition in self.manim_transitions:
+            self.add(manim_transition)
         
 
-    def create_initial_state(self, state):
+    def create_manim_initial_state(self, state):
         arrow = Arrow(buff=0.5, start=4 * LEFT, end=LEFT * 0.5)
         initial_state = VGroup(arrow, state)
-        return state # need to fix arrow to state
+        return initial_state # need to fix arrow to state
 
-    def create_final_state(self, state):
+    def create_manim_final_state(self, state):
         state_outer = Circle(radius=state.width*0.4)
         #move x and y of outerloop to be in the same position as parameter:state
         state_outer.set_x(state.get_x())
@@ -82,17 +85,16 @@ class ManimAutomaton(VMobject):
         final_state = VGroup(state, state_outer)
         return final_state
 
-    def create_state(self, label: str, x: float, y: float):
+    def create_manim_state(self, label: str, x: float, y: float):
         circle = Circle(radius=0.5)
         state = VGroup(circle, Text(label, font_size=30))
 
         state.set_x(float(x)/30)
         state.set_y(float(y)/30)
 
-
         return state
 
-    def create_transition(self, start_state, end_state, label=None):
+    def create_manim_transition(self, start_state, end_state, label=None):
         if start_state == end_state: #create transition that points to itself
             transition = Arrow([-1, 2, 0], start_state, buff=0) #refactor this to look better
         else: #start_state ----> end_state
@@ -104,6 +106,19 @@ class ManimAutomaton(VMobject):
             transition = VGroup(transition, text)
 
         return transition
+
+    def get_initial_state(self):
+        return self.automaton.get_initial_state()
+
+    def get_manim_transition(self, transition: Transition): #incorrect solution TODO
+        for manim_transition in self.manim_transitions:
+            if manim_transition.transition.transition_from == transition.transition_from:
+                return manim_transition
+
+    def get_manim_state(self, state: State):
+        pass
+        
+
 
     # def position_states(self, states): #algorithm to position states in scene
     #     for state in states: #find initial state
@@ -123,38 +138,12 @@ class ManimAutomaton(VMobject):
 
     
     def create_bezier(self):
-           #     self.add(transition)
-        pass
-        # a = ArcPolygon(ORIGIN, RIGHT + 3, [0, 2, 0], radius=6)
-        # a = Arc(angle=PI*1.9, radius=-1)
-        # a.add_tip()
-        # self.add(a)
-        # vertices = [
-        #     [0, 0, 0],
-        #     [0, 1, 2],
-        #     [1, 0, 1],
-        #     [0, 0, 0]
-        # ]
-        # cubic_bezier = CubicBezier(points=vertices)
-        # self.add(cubic_bezier)
-        # p1 = np.array([-3, 1, 0])
-        # p1b = p1 + [1, 0, 0]
-        # d1 = Dot(point=p1).set_color(BLUE)
-        # l1 = Line(p1, p1b)
-        # p2 = np.array([3, -1, 0])
-        # p2b = p2 - [1, 0, 0]
-        # d2 = Dot(point=p2).set_color(RED)
-        # l2 = Line(p2, p2b)
         # bezier = CubicBezier(ORIGIN, UP, UP * RIGHT, DOWN * RIGHT)
-
-
         # arrow_tip = ArrowTip()
         # self.add(arrow_tip)
-
         # self.add(bezier)
-
         # self.add(CurvedArrow(ORIGIN, DOWN).shift(LEFT * 4))
-    
+        pass
     
     #need to create a transition function that transitions to itself
     def create_reflextive_transition(): #change name of this!
@@ -172,7 +161,8 @@ class ManimAutomaton(VMobject):
 
         
 
-class State(VMobject):
+class ManimState(VMobject):
+
 
     def __init__(self):
         super().__init__()
@@ -229,13 +219,4 @@ class State(VMobject):
             transition = VGroup(transition, text)
 
         return transition
-        
-    
 
-
-
-        # dot1 = Circle().shift(LEFT)
-        # dot2 = Circle()
-        # dot3 = Circle().shift(RIGHT)
-        # self.dotgrid = VGroup(dot1, dot2, dot3)
-        # self.add(self.dotgrid)

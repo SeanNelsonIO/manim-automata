@@ -2,10 +2,6 @@
 	<type>fa</type>
 	<automaton>
 		<!--The list of states.-->
-		<state id="0" name="q0">
-			<x>0.0</x>
-			<y>0.0</y>
-		</state>
 		<state id="1" name="q1">
 			<x>92.0</x>
 			<y>120.0</y>

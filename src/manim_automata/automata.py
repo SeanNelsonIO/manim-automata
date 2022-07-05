@@ -46,14 +46,17 @@ class State:
         self.initial = initial
         self.final = final
 
-        #list of states that this state is linked to
+        #list of transitions links this state to others
         self.links = []
 
-    def add_transition(self, transition_to, read_symbols):
-        self.links.append(Transition(self.id, transition_to, read_symbols))
+    def add_transition(self, transition):
+        self.links.append(transition)
 
     def get_transitions(self):
-        pass
+        return self.links
+
+    def get_transition(self, index: int):
+        return self.links[index]
 
     def __str__(self) -> str:
         return 'State id: {self.id}, name: {self.name}'.format(self=self)
@@ -131,7 +134,10 @@ class deterministic_finite_automaton:
                     to_state = state
 
             if from_state and to_state: #if states exist create transition
-                self.transitions.append(Transition(from_state, to_state, transition_symbols))
+                new_transition = Transition(from_state, to_state, transition_symbols)
+                self.transitions.append(new_transition)
+                #add the transition to the from_states link list
+                from_state.add_transition(new_transition)
 
     def run(self, input_string: str):
         current_state = self.get_initial_state() #initial state is the first state in sequence
@@ -147,6 +153,19 @@ class deterministic_finite_automaton:
         return False #The last state was not a final state, therefore the string is rejected.
 
 
+    def step(self, token: str, state_pointer: State):
+        next_state = None
+        state_transitions = state_pointer.get_transitions()
+        #go through each transition of this state
+        for transition in state_transitions: 
+            if transition.input_symbol == token.text:
+                result = True #the token matches the transition's input
+                next_state = transition.transition_to
+            else:
+                result = False
+            break #for now we take the first state (non-determinism) TODO
+            
+        return result, next_state
 
         # current_state = self.get_initial_state() #initial state is the first state in sequence
         # for i in range(len(input_string)): #iterate through inputs
@@ -173,20 +192,24 @@ class deterministic_finite_automaton:
         
             
 
-    def step(self, input_token: str, transitions: Transition, current_state: State):
+    # def step(self, input_token: str, transitions: Transition, current_state: State):
         
-        for transition in transitions:
-            if transition.input_symbol == input_token:
-                pass
+    #     for transition in transitions:
+    #         if transition.input_symbol == input_token:
+    #             pass
 
 
-        pass
+    #     pass
 
     def get_initial_state(self):
         for state in self.states:
             if state.initial == True:
                 return state
 
+    def get_state(self, name):
+        for state in self.states:
+            if state.name == name:
+                return state
         #create error message here - need to look up standard.
 
     def generate_transition_branches(self): #this seams like a NFA
