@@ -1,3 +1,4 @@
+from os import stat
 from manim import *
 from src.manim_automata.automata import deterministic_finite_automaton
 
@@ -75,12 +76,11 @@ class ManimAutomaton(VMobject):
 
     def create_final_state(self, state):
         state_outer = Circle(radius=state.width*0.4)
-        # state_outer.set_x(state.get_x())
-        # state_outer.set_y(state.get_y())
-        # self.add(state_outer)
+        #move x and y of outerloop to be in the same position as parameter:state
+        state_outer.set_x(state.get_x())
+        state_outer.set_y(state.get_y())
         final_state = VGroup(state, state_outer)
         return final_state
-        return state
 
     def create_state(self, label: str, x: float, y: float):
         circle = Circle(radius=0.5)
