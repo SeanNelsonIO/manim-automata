@@ -1,3 +1,4 @@
+from re import L
 from xmlrpc.client import boolean
 from .xml_parser import parse_xml_file
 
@@ -55,26 +56,35 @@ class State:
     def get_transitions(self):
         return self.links
 
-    def get_transition(self, index: int):
+    def get_transition(self, index: int): #DEPRECATED
         return self.links[index]
 
     def __str__(self) -> str:
         return 'State id: {self.id}, name: {self.name}'.format(self=self)
 
 class Transition:
+    transition_counter = 0
 
-    def __init__(self, transition_from: State, transition_to: State, input_symbol: str):
+    def __init__(self, transition_from: State, transition_to: State, input_symbol: str, transition_id: int):
+        self.id = transition_id
         self.transition_from = transition_from
         self.transition_to = transition_to
         self.input_symbol = input_symbol
 
         #when creating a transition add the transition to the states
 
+    def generate_id(self):
+        self.transition_counter = self.transition_counter + 1
+        return self.transition_counter
+        
+
 
 
 class deterministic_finite_automaton:
     states = []
     transitions = []
+    
+    transition_counter = 0
 
     def __init__(self, template=None, states=None, transitions=None, xml_file=None):
         if template:
@@ -134,8 +144,10 @@ class deterministic_finite_automaton:
                     to_state = state
 
             if from_state and to_state: #if states exist create transition
-                new_transition = Transition(from_state, to_state, transition_symbols)
+                self.transition_counter = self.transition_counter + 1 #generates ids for transitions (REPLACE) TODO
+                new_transition = Transition(from_state, to_state, transition_symbols, self.transition_counter)
                 self.transitions.append(new_transition)
+                print(new_transition.id)
                 #add the transition to the from_states link list
                 from_state.add_transition(new_transition)
 
@@ -157,15 +169,15 @@ class deterministic_finite_automaton:
         next_state = None
         state_transitions = state_pointer.get_transitions()
         #go through each transition of this state
-        for transition in state_transitions: 
-            if transition.input_symbol == token.text:
-                result = True #the token matches the transition's input
+        for transition in state_transitions:
+            #check if any transition's symbols match the input token
+            if transition.input_symbol == token.text: #currently we pick the first transition that matches if one exists, however this won't work for non-deterministic machines
                 next_state = transition.transition_to
-            else:
-                result = False
-            break #for now we take the first state (non-determinism) TODO
+                return True, next_state, transition.id #the token matches the transition's input
+                
             
-        return result, next_state
+            
+        return False, next_state, None
 
         # current_state = self.get_initial_state() #initial state is the first state in sequence
         # for i in range(len(input_string)): #iterate through inputs

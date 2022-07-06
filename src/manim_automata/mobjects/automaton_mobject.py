@@ -5,7 +5,7 @@ __all__ = ["State"]
 
 
 class ManimTransition(VMobject):
-    def __init__(self, transition, start_state, end_state, label=None):
+    def __init__(self, transition: Transition, start_state, end_state, label=None):
         super().__init__()
 
         self.transition = transition
@@ -110,9 +110,9 @@ class ManimAutomaton(VMobject):
     def get_initial_state(self):
         return self.automaton.get_initial_state()
 
-    def get_manim_transition(self, transition: Transition): #incorrect solution TODO
+    def get_manim_transition(self, transition_id: int): #incorrect solution TODO
         for manim_transition in self.manim_transitions:
-            if manim_transition.transition.transition_from == transition.transition_from:
+            if manim_transition.transition.id == transition_id:
                 return manim_transition
 
     def get_manim_state(self, state: State):

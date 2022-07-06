@@ -1,11 +1,12 @@
 from enum import auto
+from hmac import trans_36
 from manim import *
 from manim_automata.automata import Transition
 # from manim_automata.automata import Automata
 # from manim_automata.mobjects.automaton_mobject import ManimAutomaton
 # from src.manim-automata import *
 from src.manim_automata.mobjects import *
-from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton
+from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton, ManimTransition
 
 class CreateCircle(MovingCameraScene):
     def construct(self):
@@ -38,7 +39,7 @@ class CreateCircle(MovingCameraScene):
         
         
         # input_string = ["0", "1", "0", "0", "1", "0"]
-        input_string = "10101010"
+        input_string = "010101010"
         if self.play_string(input_string) is False:
             self.play(Create(Text("REJECTED").shift((DOWN*3))))
         else:
@@ -72,8 +73,11 @@ class CreateCircle(MovingCameraScene):
                 #animate for the final state
                 pass
             
-            step_result, next_state = self.manim_automaton.automaton.step(token, state_pointer)
-            self.animate_step(token, state_pointer, step_result)
+            step_result, next_state, transition_id = self.manim_automaton.automaton.step(token, state_pointer)
+            #get transition with transition id
+            transition = self.manim_automaton.get_manim_transition(transition_id)
+
+            self.animate_step(transition, token, state_pointer, step_result)
             
             #if successful point to the next state
             if step_result is True:
@@ -87,39 +91,38 @@ class CreateCircle(MovingCameraScene):
         return True
 
 
-    def animate_step(self, token: str, state_pointer, result: bool):
+    def animate_step(self, manim_transition: ManimTransition, token: str, state_pointer, result: bool):
 
-        first_transition = self.manim_automaton.manim_transitions[0]
-
-        manim_transition = self.manim_automaton.get_manim_transition(state_pointer.get_transition(0))
-        
-        # first_transition.add_updater([1, 1, 0])
-        # self.play()
-        # d1 = Dot().set_color(ORANGE)
-        # l1 = Line(LEFT, RIGHT)
-        # l2 = VMobject()
-        # self.add(d1, l1, l2)
-        # l2.add_updater(lambda x: x.become(Arrow(LEFT, d1.get_center()).set_color(ORANGE)))
-        # self.play(MoveAlongPath(d1, l1), rate_func=linear)
-
-        # self.play(token.animate.)
-
-    
-        self.play(
-            Transform(token, manim_transition)
-        )
-
-        self.remove(token) # removes the token once it has transformed
-
-        if result is True:
+        if manim_transition == None: #there is no possible transition
             self.play(
-                first_transition.animate.set_color(GREEN) # create a custom animation to signify result
+                token.animate.set_color(RED) # create a custom animation to signify result
             )
         else:
+            # first_transition.add_updater([1, 1, 0])
+            # self.play()
+            # d1 = Dot().set_color(ORANGE)
+            # l1 = Line(LEFT, RIGHT)
+            # l2 = VMobject()
+            # self.add(d1, l1, l2)
+            # l2.add_updater(lambda x: x.become(Arrow(LEFT, d1.get_center()).set_color(ORANGE)))
+            # self.play(MoveAlongPath(d1, l1), rate_func=linear)
+
+            # self.play(token.animate.)
+
             self.play(
-                first_transition.animate.set_color(RED) # create a custom animation to signify result
+                Transform(token, manim_transition)
             )
+
+            self.remove(token) # removes the token once it has transformed
+
+            if result is True:
+                self.play(
+                    manim_transition.animate.set_color(GREEN) # create a custom animation to signify result
+                )
+            else:
+                self.play(
+                    manim_transition.animate.set_color(RED) # create a custom animation to signify result
+                )
             
-        return result
 
 
