@@ -27,5 +27,5 @@ from manim.animation.animation import Animation
 
 
 
-class AutomataRun(Animation):
+class AutomataRun(Animation): #for creating our own animations
     pass

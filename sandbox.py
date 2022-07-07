@@ -1,49 +1,33 @@
 from enum import auto
 from hmac import trans_36
+from typing import Text
 from manim import *
 from manim_automata.automata import Transition
-# from manim_automata.automata import Automata
-# from manim_automata.mobjects.automaton_mobject import ManimAutomaton
-# from src.manim-automata import *
 from src.manim_automata.mobjects import *
 from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton, ManimTransition
 
 class CreateCircle(MovingCameraScene):
     def construct(self):
-        # dot_grid = DotGrid()
-        # circle = Circle()  # create a circle
-        # circle.set_fill(PINK, opacity=0.5)  # set the color and transparency
-        # self.play(Create(dot_grid))  # show the circle on screen
-        # dot_grid.update_dot()
-        # self.play(Create(dot_grid))  # show the circle on screen
 
         for x in range(-7, 8):
             for y in range(-4, 5):
                 self.add(Dot(np.array([x, y, 0]), color=DARK_GREY))
 
-        # self.camera_frame.save_state()
 
-        # state = State()
         self.manim_automaton = ManimAutomaton()
-        # self.play(Create(automaton))
-
-
-        # automaton.play_string("1010010010")
         
 
-            
         self.play(
             Create(self.manim_automaton), #vector that shifts automaton to centre of scene
             # self.camera.frame.animate.scale(.5)
         )
         
         
-        # input_string = ["0", "1", "0", "0", "1", "0"]
         input_string = "010101010"
         if self.play_string(input_string) is False:
-            self.play(Create(Text("REJECTED").shift((DOWN*3))))
+            self.play_rejected()
         else:
-            self.play(Create(Text("Accepted").shift((DOWN*3))))
+            self.play_accepted()
 
         self.wait(1)
 
@@ -52,18 +36,13 @@ class CreateCircle(MovingCameraScene):
         manim_tokens = []
         spacing = 0
         for token in string:
-            manim_tokens.append(Text(token, font_size=40).shift((DOWN*2) + [spacing, 0, 0]))
+            manim_tokens.append(Text(token, font_size=40).shift((DOWN*2) + [spacing, 0, 0] + (LEFT * 3)))
             spacing = spacing + 0.5
-
-
 
         #display string
         for token in manim_tokens:
             self.add(token)
             
-
-
-
         #Points to the current state
         state_pointer = self.manim_automaton.get_initial_state()
         #animate the automaton going through the sequence
@@ -84,11 +63,15 @@ class CreateCircle(MovingCameraScene):
                 #move state_pointer to next state
                 if next_state:
                     state_pointer = next_state
-            else:
+            else: #if step fails then stop play process early as the string is not accepted
                 return False
-            #if not then reject string
-
-        return True
+            
+        
+        #check that the current state_pointer is a final state
+        if state_pointer.final:
+            return True
+        else:
+            return False
 
 
     def animate_step(self, manim_transition: ManimTransition, token: str, state_pointer, result: bool):
@@ -98,17 +81,6 @@ class CreateCircle(MovingCameraScene):
                 token.animate.set_color(RED) # create a custom animation to signify result
             )
         else:
-            # first_transition.add_updater([1, 1, 0])
-            # self.play()
-            # d1 = Dot().set_color(ORANGE)
-            # l1 = Line(LEFT, RIGHT)
-            # l2 = VMobject()
-            # self.add(d1, l1, l2)
-            # l2.add_updater(lambda x: x.become(Arrow(LEFT, d1.get_center()).set_color(ORANGE)))
-            # self.play(MoveAlongPath(d1, l1), rate_func=linear)
-
-            # self.play(token.animate.)
-
             self.play(
                 Transform(token, manim_transition)
             )
@@ -124,5 +96,36 @@ class CreateCircle(MovingCameraScene):
                     manim_transition.animate.set_color(RED) # create a custom animation to signify result
                 )
             
+    def play_rejected(self):
+        text = Text("REJECTED")
+        self.play(
+            Create(text.shift(DOWN*3)),
+            text.animate.set_color(RED)
+        )
+
+        for manim_transition in self.manim_automaton.manim_transitions:
+            self.add(manim_transition.set_color(RED))
+            # self.play(manim_transition.animate.set_color(RED))
+        
+        for key in self.manim_automaton.manim_states:
+            manim_state = self.manim_automaton.manim_states[key]
+            self.add(manim_state.set_color(RED))
+        
+
+        
+
+    def play_accepted(self):
+        text = Text("Accepted")
+        self.play(
+            Create(text.shift(DOWN*3)),
+            text.animate.set_color(GREEN)
+        )
+
+        for manim_state in self.manim_automaton.manim_states:
+            self.add(manim_state.set_color(GREEN))
+
+        for key in self.manim_automaton.manim_states:
+            manim_state = self.manim_automaton.manim_states[key]
+            self.add(manim_state.set_color(GREEN))
 
 

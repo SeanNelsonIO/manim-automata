@@ -2,40 +2,35 @@ from re import L
 from xmlrpc.client import boolean
 from .xml_parser import parse_xml_file
 
-class Automata:
-    """
-    Abstract class providing attributes and methods for automatas
-    ...
+# class Automata:
+#     """
+#     Abstract class providing attributes and methods for automatas
+#     ...
 
-    Attributes
-    ----------
-    states : float
-        States of automata.
-    transitions :
-        Transitions of between states
-    Methods
-    -------
-    colorspace(c='rgb')
-        Represent the photo in the given colorspace.
-    gamma(n=1.0)
-        Change the photo's gamma exposure.
+#     Attributes
+#     ----------
+#     states : float
+#         States of automata.
+#     transitions :
+#         Transitions of between states
+#     Methods
+#     -------
+#     colorspace(c='rgb')
+#         Represent the photo in the given colorspace.
+#     gamma(n=1.0)
+#         Change the photo's gamma exposure.
 
-    """
+#     """
 
-    def __init__(self) -> None:
-        """ """
-        pass
+#     def __init__(self) -> None:
+#         """ """
+#         pass
 
-    def __init__(self, states, transitions):
-        states = states
-        transitions = transitions
+#     def __init__(self, states, transitions):
+#         states = states
+#         transitions = transitions
 
-    # def __setattr__(self, __name: str, __value: Any) -> None:
-    #     self.__dict__[__name] = __value
 
-    # def __getattribute__(self, __name: str) -> Any:
-    #     return self.__dict__[__name]
-    # look into these please.
 
 
 class State:
@@ -179,40 +174,6 @@ class deterministic_finite_automaton:
             
         return False, next_state, None
 
-        # current_state = self.get_initial_state() #initial state is the first state in sequence
-        # for i in range(len(input_string)): #iterate through inputs
-            # get transitions of current state
-            # current_transitions = current_state.get_transitions()
-
-
-            # pass transitions to step function
-            # get the next state from step function
-
-            # current_state = self.step(input_string[i], current_transitions, current_state)
-        
-
-            # #consume token
-            # if input_string == 1:
-            #     input_string = ''
-            #     break
-            # else:
-            #     input_string = input_string[i:]
-            # if i == input_string: #once all the tokens have been consumed stop running.
-            #     break
-
-        #check if the current state is a final state
-        
-            
-
-    # def step(self, input_token: str, transitions: Transition, current_state: State):
-        
-    #     for transition in transitions:
-    #         if transition.input_symbol == input_token:
-    #             pass
-
-
-    #     pass
-
     def get_initial_state(self):
         for state in self.states:
             if state.initial == True:
@@ -224,47 +185,24 @@ class deterministic_finite_automaton:
                 return state
         #create error message here - need to look up standard.
 
-    def generate_transition_branches(self): #this seams like a NFA
-        #Some input_strings may create different branches as a state may have mulitple transitions
-        #where the transitions consume variable lengths of the input string, resulting in branches
-        #These branches will execute different paths, where the String is accepted.
-        # do this count as non-determinism? ask Sam
-        pass
-
-    # def run(self, input_string: list[str]):
-    #     validation_response = self.validate_automaton() #returns tuple (bool, message)
-    #     if validation_response[0] == False:
-    #         return validation_response[1]
-        
-    #     for symbol in input_string:
-    #         self.step(symbol)
-
-    
-    # def step(self, input_sybol: str, transition: Transition):
+    # def generate_transition_branches(self): #this seams like a NFA
+    #     #Some input_strings may create different branches as a state may have mulitple transitions
+    #     #where the transitions consume variable lengths of the input string, resulting in branches
+    #     #These branches will execute different paths, where the String is accepted.
+    #     # do this count as non-determinism? ask Sam
     #     pass
 
-    def validate_automaton(self): #checks to see if automaton can run
-        #check if there is an initial state
-        response = []
-        for state in self.states:
-            if state.inital:
-                break
+    # def validate_automaton(self): #checks to see if automaton can run
+    #     #check if there is an initial state
+    #     response = []
+    #     for state in self.states:
+    #         if state.inital:
+    #             break
 
-        #check there is atleast one final state
-        for state in self.states:
-            if state.inital:
-                break
+    #     #check there is atleast one final state
+    #     for state in self.states:
+    #         if state.inital:
+    #             break
 
-        pass
-
-# class InputString():
-#     input_string = str #the input string itself
-#     stride = int #defined by transition
-#     pass
-
-
-# class alphabet():
-#     pass
-
-#could define an alphabet to make the choise of symbols easier.
+    #     pass
 
