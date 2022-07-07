@@ -3,7 +3,6 @@ from src.manim_automata.automata import deterministic_finite_automaton, Transiti
 
 __all__ = ["State"]
 
-
 class ManimTransition(VMobject):
     def __init__(self, transition: Transition, start_state, end_state, label=None):
         super().__init__()

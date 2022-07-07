@@ -9,16 +9,21 @@ from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton, ManimT
 class CreateCircle(MovingCameraScene):
     def construct(self):
 
-        for x in range(-7, 8):
-            for y in range(-4, 5):
-                self.add(Dot(np.array([x, y, 0]), color=DARK_GREY))
+        # for x in range(-7, 8):
+        #     for y in range(-4, 5):
+        #         self.add(Dot(np.array([x, y, 0]), color=DARK_GREY))
 
 
         self.manim_automaton = ManimAutomaton()
-        
+       
+
+        #setup cameara
+        self.play(
+            self.camera.frame.animate.move_to(self.manim_automaton).scale(1)
+        )
 
         self.play(
-            Create(self.manim_automaton), #vector that shifts automaton to centre of scene
+            DrawBorderThenFill(self.manim_automaton), #vector that shifts automaton to centre of scene
             # self.camera.frame.animate.scale(.5)
         )
         
@@ -82,14 +87,30 @@ class CreateCircle(MovingCameraScene):
             )
         else:
             self.play(
+                Indicate(token)
+            )
+            
+            self.play(
                 Transform(token, manim_transition)
             )
 
-            self.remove(token) # removes the token once it has transformed
-
+            # self.remove(token) # removes the token once it has transformed
+        
             if result is True:
+                
                 self.play(
-                    manim_transition.animate.set_color(GREEN) # create a custom animation to signify result
+                    ShowPassingFlash(
+                        manim_transition.arrow.copy().set_color(GREEN),
+                        run_time=2,
+                        time_width=2
+                    ),
+                    Flash(manim_transition.text, color=GREEN)
+                )
+
+
+                self.play(
+                    ShowPassingFlash(token, color=GREEN)
+                    # manim_transition.animate.set_color(GREEN) # create a custom animation to signify result
                 )
             else:
                 self.play(
