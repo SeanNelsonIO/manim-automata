@@ -32,7 +32,7 @@ class ManimState(VMobject):
         self.manim_state = VGroup(self.circle, Text(state.name, font_size=30))
 
         self.manim_state.set_x(float(state.x)/30)
-        self.manim_state.set_y(float(state.y)/30)
+        self.manim_state.set_y(float(state.y*-1)/30) # multiply y by -1 to flip the y axis, more similar to JFLAP
 
         if initial:
             self.set_to_initial_state()
@@ -55,6 +55,8 @@ class ManimState(VMobject):
         self.add(self.manim_state)
 
 
+
+
 class ManimAutomaton(VMobject):
 
     manim_states = {}
@@ -65,7 +67,7 @@ class ManimAutomaton(VMobject):
         if automata_templete:
             pass
         #composite relationship
-        self.automaton = deterministic_finite_automaton(xml_file='testmachine.jff')
+        self.automaton = deterministic_finite_automaton(xml_file='testmachine2.jff')
         
         #calculate origin shift and normalise coordinates to manim coordinate system
         for state in self.automaton.states:
