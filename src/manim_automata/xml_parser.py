@@ -48,7 +48,7 @@ def initialise_automaton():
     # transitions = json_dictionary["structure"]["automaton"]["transition"]
 
 
-    return deterministic_finite_automaton(xml_file='testmachine.jff')
+    return deterministic_finite_automaton(xml_file='x_contains_a_1_in_third_final_position.jff')
 
 
     # print(states)

@@ -4,6 +4,30 @@ from src.manim_automata.automata import deterministic_finite_automaton, Transiti
 
 __all__ = ["State"]
 
+class ManimAutomataInput(VGroup):
+    def __init__(self, input_string: str, font: int = 40, **kwargs) -> None:
+        
+        super().__init__(**kwargs)
+
+        #token creation
+        self.tokens = []
+        spacing = 0
+        for token in input_string:
+            text_mobject = Text(token, font_size=font)
+            # text_mobject.set_x(self.get_x())
+            # text_mobject.set_y(self.get_y())
+
+            text_mobject.set_x(0 + spacing)
+            text_mobject.set_y(1)
+
+            self.add(text_mobject)
+            self.tokens.append(text_mobject)
+
+            spacing = spacing + 0.5
+
+
+
+
 class ManimTransition(VMobject):
     def __init__(
         self,
@@ -100,7 +124,7 @@ class ManimAutomaton(VGroup):
         if automata_templete:
             pass
         #composite relationship
-        self.automaton = deterministic_finite_automaton(xml_file='testmachine2.jff')
+        self.automaton = deterministic_finite_automaton(xml_file='x_contains_a_1_in_third_final_position.jff')
         
         #calculate origin shift and normalise coordinates to manim coordinate system
         for state in self.automaton.states:
@@ -166,7 +190,7 @@ class ManimAutomaton(VGroup):
         
 
     #returns a list of animations to run through
-    def play_string(self, input_string: str) -> None:
+    def play_string(self, manim_automata_input: ManimAutomataInput) -> None:
         list_of_animations = []
 
         #Points to the current state
@@ -175,34 +199,12 @@ class ManimAutomaton(VGroup):
         list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=YELLOW)])
 
         
-        #token creation
-        manim_tokens = []
-        spacing = 0
-        for token in input_string:
-            text_mobject = Text(token, font_size=40)
-            # text_mobject.set_x(self.get_x())
-            # text_mobject.set_y(self.get_y())
-
-            text_mobject.set_x(-2)
-            text_mobject.set_y(4)
-
-            text_mobject.shift([spacing, 0, 0])
-
-            # text_mobject.shift((UP*3) + [spacing, 0, 0] + (LEFT * 3))
-            manim_tokens.append(text_mobject)
-            spacing = spacing + 0.5
-
-        
-        #display tokens
-        manim_tokens_group = VGroup(*manim_tokens)
-        list_of_animations.append([FadeIn(manim_tokens_group)]) #put it inside list
-
-
+       
        
         #animate the automaton going through the sequence
-        for i, token in enumerate(manim_tokens):
+        for i, token in enumerate(manim_automata_input.tokens):
             #check if it is last token
-            if i == len(manim_tokens)-1:
+            if i == len(manim_automata_input.tokens)-1:
                 #animate for the final state
                 pass
             
@@ -229,16 +231,8 @@ class ManimAutomaton(VGroup):
                 text = Text("REJECTED", color=RED)
                 text.set_x(token.get_x())
                 text.set_y(token.get_y())
-                list_of_animations.append(Transform(token, text))
+                list_of_animations.append([Transform(token, text)])
                 return list_of_animations
-
-
-        # transition1 = self.get_manim_transition(1)
-        # transition2 = self.get_manim_transition(2)
-
-        # self.animate_step(transition, token, state_pointer, step_result)
-
-        # list_of_animations.append(Transform(transition1, transition2))
 
         #check that the current state_pointer is a final state
         if state_pointer.final:
@@ -341,3 +335,6 @@ class ManimAutomaton(VGroup):
     #     return list_of_accepted_animations
 
 
+
+        
+        
