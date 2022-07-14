@@ -11,7 +11,7 @@ from src.manim_automata.mobjects.automaton_animation import AnimateStep
 
 
 
-class CreateCircle(MovingCameraScene):
+class Automata(MovingCameraScene):
     def construct(self):
         #need a way of specifying the automaton (build API??)
         manim_automaton = ManimAutomaton()
@@ -24,9 +24,10 @@ class CreateCircle(MovingCameraScene):
         self.play(DrawBorderThenFill(manim_automaton))
 
 
-        input_string = "0101010"
+        input_string = "0101"
 
         for sequence in manim_automaton.play_string(input_string):
             # self.play(*sequence)
+            print(sequence)
             for step in sequence:
                 self.play(step, run_time=0.5)

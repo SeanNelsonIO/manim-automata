@@ -224,6 +224,8 @@ class ManimAutomaton(VGroup):
                     list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=YELLOW)])
             else: #if step fails then stop play process early as the string is not accepted
                 # return False
+                # list_of_animations.append(self.rejected())
+                list_of_animations.append([FadeToColor(self, color=RED)])
                 return list_of_animations
 
 
@@ -233,18 +235,18 @@ class ManimAutomaton(VGroup):
         # self.animate_step(transition, token, state_pointer, step_result)
 
         # list_of_animations.append(Transform(transition1, transition2))
-        
-        return list_of_animations
 
-
-            
-        
         #check that the current state_pointer is a final state
         if state_pointer.final:
-            return True
+            list_of_animations.append([FadeToColor(self, color=GREEN)])
+            # list_of_animations.append(self.accepted())
         else:
-            return False
+            list_of_animations.append([FadeToColor(self, color=RED)])
+            # list_of_animations.append(self.rejected())
 
+        return list_of_animations
+
+        
 
     def step(self, manim_transition: ManimTransition, token: str, state_pointer, result: bool):
         #creates a list of animations for the step
@@ -295,17 +297,37 @@ class ManimAutomaton(VGroup):
         return list_of_step_animations
 
 
-    def start_machine(self) -> None:
-        """Start swinging."""
-        spacescene: Scene = self.scene
+    # def rejected(self):
+    #     list_of_rejected_animations = []
+    #     text = Text("REJECTED", color=RED)
+    #     list_of_rejected_animations.append(
+    #         FadeIn(text.shift(DOWN*3))
+    #     )
 
-        # pins = [self.pivot_point]
-        # pins += self.bobs
-
-        # for i in range(len(pins) - 1):
-        #     self._make_joints(pins[i + 1], pins[i], spacescene)
-        #     self.rods[i].add_updater(lambda mob, i=i: self._redraw_rods(mob, pins, i))
-
+    #     for manim_transition in self.manim_transitions:
+    #         list_of_rejected_animations.append(FadeToColor(manim_transition, color=RED))
+    #         # self.play(manim_transition.animate.set_color(RED))
         
+    #     for key in self.manim_states:
+    #         manim_state = self.manim_states[key]
+    #         list_of_rejected_animations.append(FadeToColor(manim_state, color=RED))
+
+    #     return list_of_rejected_animations
+
+    # def accepted(self):
+    #     list_of_accepted_animations = []
+    #     text = Text("Accepted", color=GREEN)
+    #     list_of_accepted_animations.append(
+    #         FadeIn(text.shift(DOWN*3))
+    #     )
+
+    #     # for manim_state in self.manim_states:
+    #     #     list_of_accepted_animations.append(FadeToColor(manim_state, color=RED))
+
+    #     for key in self.manim_states:
+    #         manim_state = self.manim_states[key]
+    #         list_of_accepted_animations.append(FadeToColor(manim_state, color=RED))
+
+    #     return list_of_accepted_animations
 
 
