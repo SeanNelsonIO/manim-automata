@@ -142,7 +142,6 @@ class deterministic_finite_automaton:
                 self.transition_counter = self.transition_counter + 1 #generates ids for transitions (REPLACE) TODO
                 new_transition = Transition(from_state, to_state, transition_symbols, self.transition_counter)
                 self.transitions.append(new_transition)
-                print(new_transition.id)
                 #add the transition to the from_states link list
                 from_state.add_transition(new_transition)
 

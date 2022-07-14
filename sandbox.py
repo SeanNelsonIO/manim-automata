@@ -1,6 +1,4 @@
 from enum import auto
-from hmac import trans_36
-from typing import Text
 from manim import *
 from manim_automata.automata import Transition
 from src.manim_automata.mobjects import *
@@ -22,14 +20,13 @@ class Automata(MovingCameraScene):
         )
 
         # self.play(FadeIn(manim_automaton))
-        self.play(DrawBorderThenFill(manim_automaton.scale(0.7)))
-        self.play(DrawBorderThenFill(manim_automata_input.scale(0.9)))
+        self.play(DrawBorderThenFill(manim_automaton.scale(0.25)))
+        self.play(DrawBorderThenFill(manim_automata_input.scale(0.5)))
 
 
     
 
-        for sequence in manim_automaton.play_string(manim_automata_input):
-            # self.play(*sequence)
-            print(sequence)
-            for step in sequence:
-                self.play(step, run_time=0.5)
+        # for sequence in manim_automaton.play_string(manim_automata_input):
+        #     # self.play(*sequence)
+        #     for step in sequence:
+        #         self.play(step, run_time=0.5)
