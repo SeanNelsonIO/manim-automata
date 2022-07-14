@@ -24,7 +24,7 @@ class Automata(MovingCameraScene):
         self.play(DrawBorderThenFill(manim_automaton))
 
 
-        input_string = "0101"
+        input_string = "010101"
 
         for sequence in manim_automaton.play_string(input_string):
             # self.play(*sequence)

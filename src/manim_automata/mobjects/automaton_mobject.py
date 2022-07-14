@@ -226,6 +226,10 @@ class ManimAutomaton(VGroup):
                 # return False
                 # list_of_animations.append(self.rejected())
                 list_of_animations.append([FadeToColor(self, color=RED)])
+                text = Text("REJECTED", color=RED)
+                text.set_x(token.get_x())
+                text.set_y(token.get_y())
+                list_of_animations.append(Transform(token, text))
                 return list_of_animations
 
 
@@ -238,10 +242,16 @@ class ManimAutomaton(VGroup):
 
         #check that the current state_pointer is a final state
         if state_pointer.final:
-            list_of_animations.append([FadeToColor(self, color=GREEN)])
+            text = Text("Accepted", color=GREEN)
+            text.set_x(-1)
+            text.set_y(4)
+            list_of_animations.append([FadeToColor(self, color=GREEN), FadeIn(text)])
             # list_of_animations.append(self.accepted())
         else:
-            list_of_animations.append([FadeToColor(self, color=RED)])
+            text = Text("REJECTED", color=RED)
+            text.set_x(-1)
+            text.set_y(4)
+            list_of_animations.append([FadeToColor(self, color=RED), FadeIn(text)])
             # list_of_animations.append(self.rejected())
 
         return list_of_animations
