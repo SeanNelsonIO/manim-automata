@@ -27,5 +27,6 @@ class CreateCircle(MovingCameraScene):
         input_string = "0101010"
 
         for sequence in manim_automaton.play_string(input_string):
+            # self.play(*sequence)
             for step in sequence:
                 self.play(step, run_time=0.5)

@@ -52,7 +52,7 @@ class ManimTransition(VMobject):
         
         if label: #if the tranistion is given a label (input symbols)
             self.text = Text(label, font_size=30)
-            self.text.next_to(self.arrow, direction=UP, buff=0)
+            self.text.next_to(self.arrow, direction=UP, buff=-0.5)
             self.edge = VGroup(self.arrow, self.text)
 
         self.add(self.edge)
@@ -168,12 +168,28 @@ class ManimAutomaton(VGroup):
     #returns a list of animations to run through
     def play_string(self, input_string: str) -> None:
         list_of_animations = []
+
+        #Points to the current state
+        state_pointer = self.get_initial_state()
+        #Highlight current state with yellow
+        list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=YELLOW)])
+
         
         #token creation
         manim_tokens = []
         spacing = 0
         for token in input_string:
-            manim_tokens.append(Text(token, font_size=40).shift((DOWN*2) + [spacing, 0, 0] + (LEFT * 3)))
+            text_mobject = Text(token, font_size=40)
+            # text_mobject.set_x(self.get_x())
+            # text_mobject.set_y(self.get_y())
+
+            text_mobject.set_x(-2)
+            text_mobject.set_y(4)
+
+            text_mobject.shift([spacing, 0, 0])
+
+            # text_mobject.shift((UP*3) + [spacing, 0, 0] + (LEFT * 3))
+            manim_tokens.append(text_mobject)
             spacing = spacing + 0.5
 
         
@@ -182,8 +198,7 @@ class ManimAutomaton(VGroup):
         list_of_animations.append([FadeIn(manim_tokens_group)]) #put it inside list
 
 
-        #Points to the current state
-        state_pointer = self.get_initial_state()
+       
         #animate the automaton going through the sequence
         for i, token in enumerate(manim_tokens):
             #check if it is last token
@@ -195,13 +210,18 @@ class ManimAutomaton(VGroup):
             #get transition with transition id
             transition = self.get_manim_transition(transition_id)
             
+
+            
+
             list_of_animations.append(self.step(transition, token, state_pointer, step_result)) # self.step returns a list of animations for that step
 
             #if successful point to the next state
             if step_result is True:
                 #move state_pointer to next state
                 if next_state:
+                    list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=BLUE)])
                     state_pointer = next_state
+                    list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=YELLOW)])
             else: #if step fails then stop play process early as the string is not accepted
                 # return False
                 return list_of_animations
