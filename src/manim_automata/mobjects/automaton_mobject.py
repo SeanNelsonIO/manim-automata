@@ -1,3 +1,4 @@
+from tracemalloc import start
 from xml.etree.ElementTree import C14NWriterTarget
 from manim import *
 from src.manim_automata.automata import deterministic_finite_automaton, Transition, State
@@ -6,7 +7,7 @@ from src.manim_automata.automata import deterministic_finite_automaton, Transiti
 __all__ = ["State"]
 
 class ManimAutomataInput(VGroup):
-    def __init__(self, input_string: str, font: int = 40, **kwargs) -> None:
+    def __init__(self, input_string: str, font: int = 100, **kwargs) -> None:
         
         super().__init__(**kwargs)
 
@@ -19,7 +20,7 @@ class ManimAutomataInput(VGroup):
             # text_mobject.set_y(self.get_y())
 
             text_mobject.set_x(0 + spacing)
-            text_mobject.set_y(1)
+            text_mobject.set_y(0)
 
             self.add(text_mobject)
             self.tokens.append(text_mobject)
@@ -72,20 +73,29 @@ class ManimTransition(VMobject):
 
         self.start_state = start_state
         self.end_state = end_state
+        #create text object for label
+        self.text = Text(label, font_size=100)
 
         if start_state == end_state: #create transition that points to itself
             x = start_state.get_x()
             y = start_state.get_y()
             self.arrow = Arrow([x-5, y+10, 0], start_state.manim_state, buff=0.1, tip_style={'stroke_width': 5}) #refactor this to look better
+            #switch end and start states
+            self.end_state = start_state
+            self.start_state = [x-5, y+10, 0]
+            
+            self.position_text(self.text)
         else: #start_state ----> end_state
             self.arrow = Arrow(start_state.manim_state, end_state.manim_state, buff=0.1, tip_style={'stroke_width': 5})
+            # need to work out initial state still TODO
+            # start_point = start_state
+            # end_point = end_state
+            self.position_text(self.text)
             # self.arrow = Line(start_state.manim_state, end_state.manim_state, buff=0)
             # self.arrow.add_tip(width=10)
         
         if label: #if the tranistion is given a label (input symbols)
-            self.text = Text(label, font_size=100)
-            #need to work out initial state still TODO
-            self.position_text(self.text)
+            
 
             # self.text.next_to(self.arrow, direction=self.calculate_direction_of_arrow_label(), buff=0.1)
             # self.text.next_to(self.arrow, direction=self.calculate_direction_of_arrow_label(), buff=1)
@@ -103,9 +113,14 @@ class ManimTransition(VMobject):
         # direction_of_arrow = [self.arrow.get_x(), self.arrow.get_y()]
         # direction = self.arrow.line.get_normal_vector()
         #difference of the arrow
-
-        x1 = self.start_state.manim_state.get_x()
-        y1 = self.start_state.manim_state.get_y()
+        x1 = None
+        y1 = None
+        if type(self.start_state) == list:
+            x1 = self.start_state[0]
+            y1 = self.start_state[1]
+        else:
+            x1 = self.start_state.manim_state.get_x()
+            y1 = self.start_state.manim_state.get_y()
 
         x2 = self.end_state.manim_state.get_x()
         y2 = self.end_state.manim_state.get_y()
@@ -130,9 +145,14 @@ class ManimTransition(VMobject):
         """This function positions text next to the arrow as there was no good way to do it with the lib rary"""
 
         #Obtain coordinates for the centre of the line
-
-        x1 = self.start_state.manim_state.get_x()
-        y1 = self.start_state.manim_state.get_y()
+        x1 = None
+        y1 = None
+        if type(self.start_state) == list:
+            x1 = self.start_state[0]
+            y1 = self.start_state[1]
+        else:
+            x1 = self.start_state.manim_state.get_x()
+            y1 = self.start_state.manim_state.get_y()
 
         x2 = self.end_state.manim_state.get_x()
         y2 = self.end_state.manim_state.get_y()
@@ -240,7 +260,7 @@ class ManimAutomaton(VGroup):
             self.add(manim_transition)
             # self.scene.scene.play(Create(manim_transition))
 
-        
+        print("inside", self.manim_states[list(self.manim_states.keys())[0]].get_x())
         # self.animate = ManimAutomataAnimation
 
 
@@ -270,8 +290,17 @@ class ManimAutomaton(VGroup):
         
 
     #returns a list of animations to run through
-    def play_string(self, manim_automata_input: ManimAutomataInput) -> None:
+    def play_string(self, input_string: str) -> None:
+        #create mobject of input string
+        self.manim_automata_input = ManimAutomataInput(input_string)
+        #stores a list of animations that is returned to scene
         list_of_animations = []
+        
+        list_of_animations.append(self.set_default_position_of_input_string())
+        
+
+
+        
 
         #Points to the current state
         state_pointer = self.get_initial_state()
@@ -280,9 +309,9 @@ class ManimAutomaton(VGroup):
 
        
         #animate the automaton going through the sequence
-        for i, token in enumerate(manim_automata_input.tokens):
+        for i, token in enumerate(self.manim_automata_input.tokens):
             #check if it is last token
-            if i == len(manim_automata_input.tokens)-1:
+            if i == len(self.manim_automata_input.tokens)-1:
                 #animate for the final state
                 pass
             
@@ -309,11 +338,11 @@ class ManimAutomaton(VGroup):
                 text = Text("REJECTED", color=RED)
                 text.set_x(token.get_x())
                 text.set_y(token.get_y())
-                list_of_animations.append([FadeToColor(manim_automata_input, color=RED)])
+                list_of_animations.append([FadeToColor(self.manim_automata_input, color=RED)])
 
                 #turn the remaining tokens on the sceen to the "reject" text mobject
-                number_of_remaining_tokens = len(manim_automata_input.tokens) - i
-                remaining_tokens = VGroup(*manim_automata_input[number_of_remaining_tokens:])
+                number_of_remaining_tokens = len(self.manim_automata_input.tokens) - i
+                remaining_tokens = VGroup(*self.manim_automata_input[number_of_remaining_tokens:])
                 list_of_animations.append([Transform(remaining_tokens, text)])
 
                 return list_of_animations
@@ -385,6 +414,20 @@ class ManimAutomaton(VGroup):
         return list_of_step_animations
 
 
+    def set_default_position_of_input_string(self):
+        list_of_input_string_animations = []
+        #get centre of self
+        c1 = self.get_x()
+        c2 = self.get_y()
+        #set position of manim_automata_input relative to self
+        self.manim_automata_input.set_x(c1)
+        self.manim_automata_input.set_y(c2 + self.height/2)
+        #diplay the manim_automata_input on the screen
+        list_of_input_string_animations.append(FadeIn(self.manim_automata_input))
+
+
+
+        return list_of_input_string_animations
     # def rejected(self):
     #     list_of_rejected_animations = []
     #     text = Text("REJECTED", color=RED)
