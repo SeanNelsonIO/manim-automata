@@ -1,5 +1,3 @@
-from tracemalloc import start
-from xml.etree.ElementTree import C14NWriterTarget
 from manim import *
 from src.manim_automata.automata import deterministic_finite_automaton, Transition, State
 
@@ -77,16 +75,24 @@ class ManimTransition(VMobject):
         self.text = Text(label, font_size=100)
 
         if start_state == end_state: #create transition that points to itself
-            x = start_state.get_x()
-            y = start_state.get_y()
-            self.arrow = Arrow([x-5, y+10, 0], start_state.manim_state, buff=0.1, tip_style={'stroke_width': 5}) #refactor this to look better
-            #switch end and start states
-            self.end_state = start_state
-            self.start_state = [x-5, y+10, 0]
+            position_1, position_2 = self.calculate_circle_vertices()
+            self.create_self_arrow(position_1, position_2)
+
+            # self.position_text(self.text) # need to alter function to account for reflextive state
+
+            # x = start_state.get_x()
+            # y = start_state.get_y()
+            # self.arrow = Arrow([x-5, y+10, 0], start_state.manim_state, buff=0.1, tip_style={'stroke_width': 5}) #refactor this to look better
             
-            self.position_text(self.text)
+            
+            
+            # switch end and start states
+            # self.end_state = start_state
+            # self.start_state = [x-5, y+10, 0]
+            
+            # self.position_text(self.text)
         else: #start_state ----> end_state
-            self.arrow = Arrow(start_state.manim_state, end_state.manim_state, buff=0.1, tip_style={'stroke_width': 5})
+            self.arrow = Arrow(start_state.manim_state, end_state.manim_state, buff=0.1)
             # need to work out initial state still TODO
             # start_point = start_state
             # end_point = end_state
@@ -107,6 +113,62 @@ class ManimTransition(VMobject):
             self.edge = VGroup(self.arrow, self.text)
 
         self.add(self.edge)
+
+
+    def calculate_circle_vertices(self):
+        # centre_x = self.start_state
+        # centre_y = 
+        circle = self.start_state.circle
+        
+        p1 = circle.point_at_angle(PI/4 + PI/2)
+        p2 = circle.point_at_angle(PI/4)
+
+        #displays the points on the state
+        # s1 = Square(side_length=0.25).move_to(p1)
+        # s2 = Square(side_length=0.25).move_to(p2)
+        # self.add(s1, s2)
+        
+
+
+        # vertex_position_1 = [0, 0, 0]
+        # vertex_position_2 = [0, 0, 0]
+        return p1, p2
+
+    def create_self_arrow(self, point1, point2):
+        self.arrow = CurvedArrow(point2, point1, angle=1.5*PI)
+        self.add(self.arrow)
+        
+        center_of_arc = self.arrow.get_arc_center()
+        radius = self.arrow.radius
+
+        #positions the text above the reflexive arrow
+        self.text.move_to(center_of_arc).shift(UP*radius*1.5)
+
+
+
+    def create_reflexive_arrow(self, point1, point2):
+        # point1 = np.array([0.2, 0, 0])
+        # point2 = np.array([-0.2, 0, 0])
+        control1 = np.array([-point1[0], point1[1] + 10, 0])
+        control2 = np.array([point2[0], point2[1] + 10, 0])
+        
+        self.arrow = bezier = CubicBezier(point1, control2, control1, point2)
+        # self.arrow.width = 10
+
+        #visual display of vertices
+        # dot1 = Dot(point=point1).set_color(BLUE)
+        dotcontrol1 = Dot(point=control1).set_color(ORANGE)
+        dot2 = Dot(point=point2).set_color(BLUE)
+        dotcontrol2 = Dot(point=control2).set_color(RED)
+
+
+        triangle = Triangle(color=GREEN, fill_color=GREEN, fill_opacity=1).rotate(60*DEGREES).scale(0.1)
+        triangle.set_x(point2[0])
+        triangle.set_y(point2[1])
+    
+        dot_group = VGroup(bezier, triangle, dotcontrol1, dot2,  dotcontrol2)
+        self.add(dot_group)
+        # self.play(FadeIn(dot_group.scale(2)))
 
     def calculate_direction_of_arrow_label(self):
         """Calculates the which side of the arrow the label should be placed"""
