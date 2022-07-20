@@ -1,40 +1,40 @@
-
 from .xml_parser import parse_xml_file
-
-# class Automata:
-#     """
-#     Abstract class providing attributes and methods for automatas
-#     ...
-
-#     Attributes
-#     ----------
-#     states : float
-#         States of automata.
-#     transitions :
-#         Transitions of between states
-#     Methods
-#     -------
-#     colorspace(c='rgb')
-#         Represent the photo in the given colorspace.
-#     gamma(n=1.0)
-#         Change the photo's gamma exposure.
-
-#     """
-
-#     def __init__(self) -> None:
-#         """ """
-#         pass
-
-#     def __init__(self, states, transitions):
-#         states = states
-#         transitions = transitions
-
-
-
+import itertools
 
 class State:
-    def __init__(self, id: int, name: str, x: int, y: int, initial: bool = None, final: bool = None):
-        self.id = id
+    """Class that represents states.
+
+    Parameters
+    ----------
+    name
+        The class' name.
+    x
+        The class' position on the x-axis.
+    y
+        The class' position on the x-axis.
+    initial
+        The class' state type, in terms of initial state.
+    final
+        the class' state type, in terms of final state.
+
+    Attributes
+    ----------
+    id
+        The instance's id.
+    x
+        The value that represents the instance's position on the x-axis.
+    y
+        The value that represents the instance's position on the y-axis.
+    initial
+        If the instance is an initial state or not.
+    final
+        If the instance is a final state or not.
+    """
+
+    id_iter = itertools.count()
+
+    def __init__(self, name: str, x: int, y: int, initial: bool = None, final: bool = None):
+        self.id = next(self.id_iter)
         self.name = name
         self.x = x
         self.y = y
@@ -57,31 +57,64 @@ class State:
         return 'State id: {self.id}, name: {self.name}'.format(self=self)
 
 class Transition:
-    transition_counter = 0
+    """Class that represents transitions between states.
 
-    def __init__(self, transition_from: State, transition_to: State, input_symbol: str, transition_id: int):
-        self.id = transition_id
+    Parameters
+    ----------
+    transition_from
+        Json object that describes an automaton.
+    transition_to
+        Path of XML format file describing an automaton.
+    input_symbol
+        The class' input symbol.
+    Attributes
+    ----------
+    id
+        The instance's id.
+    transition_from
+        The state where the transition begins.
+    transition_to
+        The state where the transition ends.
+    input_symbol
+        The symbols that the transition requires.
+    """
+    id_iter = itertools.count()
+
+    def __init__(self, transition_from: State, transition_to: State, input_symbol: str):
+        self.id = next(self.id_iter)
         self.transition_from = transition_from
         self.transition_to = transition_to
         self.input_symbol = input_symbol
 
         #when creating a transition add the transition to the states
-
-    def generate_id(self):
-        self.transition_counter = self.transition_counter + 1
-        return self.transition_counter
         
 
+class Automaton:
+    def __init__(self) -> None:
+        pass
 
 
-class deterministic_finite_automaton:
+class FiniteStateAutomaton(Automaton):
+    """Class that represents finite state machines, including DFAs and NFAs.
+
+    Parameters
+    ----------
+    json_template
+        Json object that describes an automaton.
+    xml_file
+        Path of XML format file describing an automaton.
+    Attributes
+    ----------
+    states
+        List of State instances.
+    transitions
+        List of Transition instances.
+    """
     states = []
     transitions = []
-    
-    transition_counter = 0
 
-    def __init__(self, template=None, states=None, transitions=None, xml_file=None):
-        if template:
+    def __init__(self, json_template=None, xml_file=None):
+        if json_template:
             pass #extract states and transitions from template if valid
         elif xml_file:
             json_dictionary = parse_xml_file(xml_file)
@@ -90,13 +123,9 @@ class deterministic_finite_automaton:
 
             states = json_dictionary["structure"]["automaton"]["state"]
             transitions = json_dictionary["structure"]["automaton"]["transition"]
+            
+            #sort states, just in case they are not in order TODO
 
-            for state in states: #create states
-                self.add_state(state)
-
-            self.add_transitions(transitions)
-
-        elif states and transitions:
             for state in states: #create states
                 self.add_state(state)
 
@@ -105,7 +134,7 @@ class deterministic_finite_automaton:
         else: return False
         
 
-    def add_state(self, state: dict):
+    def add_state(self, state: dict) -> None:
         #check if initial is set in state
         initial = False
         final = False
@@ -119,11 +148,10 @@ class deterministic_finite_automaton:
         if 'final' in state.keys():
             final = True
 
-
         #check if final exist in state
-        self.states.append(State(state["@id"], state["@name"], state["x"], state["y"], initial=initial, final=final))
+        self.states.append(State(state["@name"], state["x"], state["y"], initial=initial, final=final))
 
-    def add_transitions(self, transitions: list[dict]): #function slow, REFACTOR!
+    def add_transitions(self, transitions: list[dict]) -> None: #function slow, REFACTOR!
         #go through each transition, fetch the corresponding state and add the transition to state
         for transition in transitions:
             #get states
@@ -132,19 +160,18 @@ class deterministic_finite_automaton:
             transition_symbols = transition['read']
 
             for state in self.states:
-                if state.id == transition['from']:
+                if state.id == int(transition['from']):
                     from_state = state
-                if state.id == transition['to']:
+                if state.id == int(transition['to']):
                     to_state = state
 
             if from_state and to_state: #if states exist create transition
-                self.transition_counter = self.transition_counter + 1 #generates ids for transitions (REPLACE) TODO
-                new_transition = Transition(from_state, to_state, transition_symbols, self.transition_counter)
+                new_transition = Transition(from_state, to_state, transition_symbols)
                 self.transitions.append(new_transition)
                 #add the transition to the from_states link list
                 from_state.add_transition(new_transition)
 
-    def run(self, input_string: str):
+    def run(self, input_string: str) -> bool:
         current_state = self.get_initial_state() #initial state is the first state in sequence
         current_transitions = current_state.get_transitions()
         for transition in current_transitions:
@@ -158,7 +185,7 @@ class deterministic_finite_automaton:
         return False #The last state was not a final state, therefore the string is rejected.
 
 
-    def step(self, token: str, state_pointer: State):
+    def step(self, token: str, state_pointer: State) -> tuple:
         next_state = None
         state_transitions = state_pointer.get_transitions()
         #go through each transition of this state
@@ -168,39 +195,21 @@ class deterministic_finite_automaton:
                 next_state = transition.transition_to
                 return True, next_state, transition.id #the token matches the transition's input
                 
-            
-            
         return False, next_state, None
 
-    def get_initial_state(self):
+    def get_initial_state(self) -> State:
         for state in self.states:
             if state.initial == True:
                 return state
 
-    def get_state(self, name):
+    def get_state(self, name) -> State:
         for state in self.states:
             if state.name == name:
                 return state
-        #create error message here - need to look up standard.
+        #create error message here - need to look up standard. TODO
 
-    # def generate_transition_branches(self): #this seams like a NFA
-    #     #Some input_strings may create different branches as a state may have mulitple transitions
-    #     #where the transitions consume variable lengths of the input string, resulting in branches
-    #     #These branches will execute different paths, where the String is accepted.
-    #     # do this count as non-determinism? ask Sam
-    #     pass
+# class PushdownAutomaton(Automaton): TODO
+#     def __init__(self) -> None:
+#         pass
 
-    # def validate_automaton(self): #checks to see if automaton can run
-    #     #check if there is an initial state
-    #     response = []
-    #     for state in self.states:
-    #         if state.inital:
-    #             break
-
-    #     #check there is atleast one final state
-    #     for state in self.states:
-    #         if state.inital:
-    #             break
-
-    #     pass
 

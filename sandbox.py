@@ -5,15 +5,6 @@ from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton, ManimT
 from src.manim_automata.mobjects.automaton_animation import AnimateStep
 
 
-# animation_style = {
-#     "state": "",
-#     "transition": "",
-#     "": ""
-# }
-
-
-
-
 class Automata(MovingCameraScene):
     def construct(self):
         #need a way of specifying the automaton (build API??)
@@ -39,7 +30,6 @@ class Automata(MovingCameraScene):
         self.play(DrawBorderThenFill(rectangle))
 
 
-
         # self.play(DrawBorderThenFill(manim_automata_input.scale(1)))
         
 
@@ -57,7 +47,6 @@ class Automata(MovingCameraScene):
 
 
         
-
 class Sandbox(MovingCameraScene):
     def construct(self):
 

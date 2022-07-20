@@ -100,5 +100,10 @@
 			<to>5</to>
 			<read>1</read>
 		</transition>
+		<transition>
+			<from>5</from>
+			<to>5</to>
+			<read>1</read>
+		</transition>
 	</automaton>
 </structure>

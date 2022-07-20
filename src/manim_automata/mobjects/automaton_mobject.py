@@ -1,8 +1,7 @@
 from manim import *
-from src.manim_automata.automata import deterministic_finite_automaton, Transition, State
+from src.manim_automata.automata import Automaton, FiniteStateAutomaton, Transition, State
 
-
-__all__ = ["State"]
+__all__ = ["ManimAutomaton"]
 
 class ManimAutomataInput(VGroup):
     def __init__(self, input_string: str, font: int = 100, **kwargs) -> None:
@@ -26,18 +25,8 @@ class ManimAutomataInput(VGroup):
             spacing = spacing + 0.5
 
 
-
-
 class ManimTransition(VMobject):
-    def __init__(
-        self,
-        transition: Transition,
-        start_state: State,
-        end_state: State,
-        label: str,
-        **kwargs
-    ) -> None:
-        """A Manim Transition. A visual representation of a Transition
+    """A Manim Transition. A visual representation of a Transition instance
 
         Parameters
         ----------
@@ -65,6 +54,15 @@ class ManimTransition(VMobject):
                     self.add(TracedPath(p.bobs[-1].get_center, stroke_color=BLUE))
                     self.wait(10)
         """
+    def __init__(
+        self,
+        transition: Transition,
+        start_state: State,
+        end_state: State,
+        label: str,
+        **kwargs
+    ) -> None:
+        
         super().__init__()
 
         self.transition = transition
@@ -76,41 +74,14 @@ class ManimTransition(VMobject):
 
         if start_state == end_state: #create transition that points to itself
             position_1, position_2 = self.calculate_circle_vertices()
-            self.create_self_arrow(position_1, position_2)
-
-            # self.position_text(self.text) # need to alter function to account for reflextive state
-
-            # x = start_state.get_x()
-            # y = start_state.get_y()
-            # self.arrow = Arrow([x-5, y+10, 0], start_state.manim_state, buff=0.1, tip_style={'stroke_width': 5}) #refactor this to look better
-            
-            
-            
-            # switch end and start states
-            # self.end_state = start_state
-            # self.start_state = [x-5, y+10, 0]
-            
-            # self.position_text(self.text)
+            self.create_reflexive_arrow(position_1, position_2)
         else: #start_state ----> end_state
             self.arrow = Arrow(start_state.manim_state, end_state.manim_state, buff=0.1)
-            # need to work out initial state still TODO
-            # start_point = start_state
-            # end_point = end_state
             self.position_text(self.text)
-            # self.arrow = Line(start_state.manim_state, end_state.manim_state, buff=0)
-            # self.arrow.add_tip(width=10)
-        
         if label: #if the tranistion is given a label (input symbols)
-            
-
-            # self.text.next_to(self.arrow, direction=self.calculate_direction_of_arrow_label(), buff=0.1)
-            # self.text.next_to(self.arrow, direction=self.calculate_direction_of_arrow_label(), buff=1)
-            # self.text.shift(self.calculate_direction_of_arrow_label())
-
-
-
-
             self.edge = VGroup(self.arrow, self.text)
+        else:
+            self.edge = VGroup(self.arrow)
 
         self.add(self.edge)
 
@@ -123,18 +94,9 @@ class ManimTransition(VMobject):
         p1 = circle.point_at_angle(PI/4 + PI/2)
         p2 = circle.point_at_angle(PI/4)
 
-        #displays the points on the state
-        # s1 = Square(side_length=0.25).move_to(p1)
-        # s2 = Square(side_length=0.25).move_to(p2)
-        # self.add(s1, s2)
-        
-
-
-        # vertex_position_1 = [0, 0, 0]
-        # vertex_position_2 = [0, 0, 0]
         return p1, p2
 
-    def create_self_arrow(self, point1, point2):
+    def create_reflexive_arrow(self, point1, point2):
         self.arrow = CurvedArrow(point2, point1, angle=1.5*PI)
         self.add(self.arrow)
         
@@ -144,33 +106,7 @@ class ManimTransition(VMobject):
         #positions the text above the reflexive arrow
         self.text.move_to(center_of_arc).shift(UP*radius*1.5)
 
-
-
-    def create_reflexive_arrow(self, point1, point2):
-        # point1 = np.array([0.2, 0, 0])
-        # point2 = np.array([-0.2, 0, 0])
-        control1 = np.array([-point1[0], point1[1] + 10, 0])
-        control2 = np.array([point2[0], point2[1] + 10, 0])
-        
-        self.arrow = bezier = CubicBezier(point1, control2, control1, point2)
-        # self.arrow.width = 10
-
-        #visual display of vertices
-        # dot1 = Dot(point=point1).set_color(BLUE)
-        dotcontrol1 = Dot(point=control1).set_color(ORANGE)
-        dot2 = Dot(point=point2).set_color(BLUE)
-        dotcontrol2 = Dot(point=control2).set_color(RED)
-
-
-        triangle = Triangle(color=GREEN, fill_color=GREEN, fill_opacity=1).rotate(60*DEGREES).scale(0.1)
-        triangle.set_x(point2[0])
-        triangle.set_y(point2[1])
-    
-        dot_group = VGroup(bezier, triangle, dotcontrol1, dot2,  dotcontrol2)
-        self.add(dot_group)
-        # self.play(FadeIn(dot_group.scale(2)))
-
-    def calculate_direction_of_arrow_label(self):
+    def calculate_direction_of_arrow_label(self, normal_vector_choice: int = 0):
         """Calculates the which side of the arrow the label should be placed"""
         # direction_of_arrow = [self.arrow.get_x(), self.arrow.get_y()]
         # direction = self.arrow.line.get_normal_vector()
@@ -193,15 +129,12 @@ class ManimTransition(VMobject):
         normalised_values = normalize([difference_of_x, difference_of_y])
 
         #calculate normal of the line
-        normal_vector_1 = [-normalised_values[1], normalised_values[0], -1]
-
-        normal_vector_2 = [normalised_values[1], -normalised_values[0], -1]
+        normal_vectors = {
+            0: [-normalised_values[1], normalised_values[0], -1],
+            1: [normalised_values[1], -normalised_values[0], -1]
+        }
         
-
-        direction = normal_vector_1
-        return direction
-
-        pass
+        return normal_vectors[normal_vector_choice]
 
     def position_text(self, text: Text):
         """This function positions text next to the arrow as there was no good way to do it with the lib rary"""
@@ -224,20 +157,10 @@ class ManimTransition(VMobject):
         c2 = (y1 + y2) / 2
 
 
-        # offset = [x for x in self.calculate_direction_of_arrow_label()]
-
-        # text_coordinates = [x + y for x, y in zip([c1, c2, 0], offset)]
-
-        # arrow = Arrow([c1, c2, 0], text_coordinates, tip_style={'stroke_width': 5})
-
-        # self.add(arrow)
-
         # print(self.calculate_direction_of_arrow_label())
         #need to use the normal vector to offset the text next to the line
         offset = [x for x in self.calculate_direction_of_arrow_label()]
         text_coordinates = [x + y for x, y in zip([c1, c2, 0], offset)]
-
-        # print("text coords", text_coordinates)
 
         text.set_x(text_coordinates[0])
         text.set_y(text_coordinates[1])
@@ -286,7 +209,7 @@ class ManimAutomaton(VGroup):
         if automata_templete:
             pass
         #composite relationship
-        self.automaton = deterministic_finite_automaton(xml_file='x_contains_a_1_in_third_final_position.jff')
+        self.automaton = FiniteStateAutomaton(xml_file='x_contains_a_1_in_third_final_position.jff')
         
         #calculate origin shift and normalise coordinates to manim coordinate system
         for state in self.automaton.states:
@@ -320,10 +243,6 @@ class ManimAutomaton(VGroup):
         
         for manim_transition in self.manim_transitions:
             self.add(manim_transition)
-            # self.scene.scene.play(Create(manim_transition))
-
-        print("inside", self.manim_states[list(self.manim_states.keys())[0]].get_x())
-        # self.animate = ManimAutomataAnimation
 
 
     def create_manim_transition(self, start_state, end_state, label=None):
@@ -360,10 +279,6 @@ class ManimAutomaton(VGroup):
         
         list_of_animations.append(self.set_default_position_of_input_string())
         
-
-
-        
-
         #Points to the current state
         state_pointer = self.get_initial_state()
         #Highlight current state with yellow
@@ -380,8 +295,6 @@ class ManimAutomaton(VGroup):
             step_result, next_state, transition_id = self.automaton.step(token, state_pointer) #simulates the machine
             #get transition with transition id
             transition = self.get_manim_transition(transition_id)
-            
-
             
 
             list_of_animations.append(self.step(transition, token, state_pointer, step_result)) # self.step returns a list of animations for that step
@@ -487,43 +400,5 @@ class ManimAutomaton(VGroup):
         #diplay the manim_automata_input on the screen
         list_of_input_string_animations.append(FadeIn(self.manim_automata_input))
 
-
-
         return list_of_input_string_animations
-    # def rejected(self):
-    #     list_of_rejected_animations = []
-    #     text = Text("REJECTED", color=RED)
-    #     list_of_rejected_animations.append(
-    #         FadeIn(text.shift(DOWN*3))
-    #     )
-
-    #     for manim_transition in self.manim_transitions:
-    #         list_of_rejected_animations.append(FadeToColor(manim_transition, color=RED))
-    #         # self.play(manim_transition.animate.set_color(RED))
-        
-    #     for key in self.manim_states:
-    #         manim_state = self.manim_states[key]
-    #         list_of_rejected_animations.append(FadeToColor(manim_state, color=RED))
-
-    #     return list_of_rejected_animations
-
-    # def accepted(self):
-    #     list_of_accepted_animations = []
-    #     text = Text("Accepted", color=GREEN)
-    #     list_of_accepted_animations.append(
-    #         FadeIn(text.shift(DOWN*3))
-    #     )
-
-    #     # for manim_state in self.manim_states:
-    #     #     list_of_accepted_animations.append(FadeToColor(manim_state, color=RED))
-
-    #     for key in self.manim_states:
-    #         manim_state = self.manim_states[key]
-    #         list_of_accepted_animations.append(FadeToColor(manim_state, color=RED))
-
-    #     return list_of_accepted_animations
-
-
-
-        
         
