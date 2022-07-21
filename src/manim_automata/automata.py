@@ -33,7 +33,7 @@ class State:
 
     id_iter = itertools.count()
 
-    def __init__(self, name: str, x: int, y: int, initial: bool = None, final: bool = None):
+    def __init__(self, name: str, x: int, y: int, initial: bool = None, final: bool = None) ->  None:
         self.id = next(self.id_iter)
         self.name = name
         self.x = x
@@ -44,13 +44,13 @@ class State:
         #list of transitions links this state to others
         self.links = []
 
-    def add_transition(self, transition):
+    def add_transition(self, transition: "Transition") -> None:
         self.links.append(transition)
 
-    def get_transitions(self):
+    def get_transitions(self) -> list["Transition"]:
         return self.links
 
-    def get_transition(self, index: int): #DEPRECATED
+    def get_transition(self, index: int) -> "Transition": #DEPRECATED
         return self.links[index]
 
     def __str__(self) -> str:
@@ -80,7 +80,7 @@ class Transition:
     """
     id_iter = itertools.count()
 
-    def __init__(self, transition_from: State, transition_to: State, input_symbol: str):
+    def __init__(self, transition_from: State, transition_to: State, input_symbol: str) -> None:
         self.id = next(self.id_iter)
         self.transition_from = transition_from
         self.transition_to = transition_to
@@ -113,7 +113,7 @@ class FiniteStateAutomaton(Automaton):
     states = []
     transitions = []
 
-    def __init__(self, json_template=None, xml_file=None):
+    def __init__(self, json_template=None, xml_file=None) -> None:
         if json_template:
             pass #extract states and transitions from template if valid
         elif xml_file:

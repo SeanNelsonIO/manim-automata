@@ -1,215 +1,75 @@
 from manim import *
-from src.manim_automata.automata import Automaton, FiniteStateAutomaton, Transition, State
+from manim_automata.mobjects.automaton_animation import AnimateStep
+from src.manim_automata.automata import FiniteStateAutomaton
+from src.manim_automata.mobjects.manim_state import ManimState, State
+from src.manim_automata.mobjects.manim_automaton_input import ManimAutomataInput
+from src.manim_automata.mobjects.manim_transition import ManimTransition
+
 
 __all__ = ["ManimAutomaton"]
 
-class ManimAutomataInput(VGroup):
-    def __init__(self, input_string: str, font: int = 100, **kwargs) -> None:
-        
-        super().__init__(**kwargs)
-
-        #token creation
-        self.tokens = []
-        spacing = 0
-        for token in input_string:
-            text_mobject = Text(token, font_size=font)
-            # text_mobject.set_x(self.get_x())
-            # text_mobject.set_y(self.get_y())
-
-            text_mobject.set_x(0 + spacing)
-            text_mobject.set_y(0)
-
-            self.add(text_mobject)
-            self.tokens.append(text_mobject)
-
-            spacing = spacing + 0.5
 
 
-class ManimTransition(VMobject):
-    """A Manim Transition. A visual representation of a Transition instance
-
-        Parameters
-        ----------
-        transition
-            Positions of pendulum bobs.
-        start_state
-            state at which the transition sta
-        end_state
-            Parameters for ``Line``.
-        label
-            Parameters for ``Circle``.
-        kwargs
-            Additional parameters for ``VMobject``.
-        Examples - do I need this.
-        --------
-        .. manim:: ManimTransitionExample
-
-            from manim_physics import *
-            class MultiPendulumExample(SpaceScene):
-                def construct(self):
-                    p = MultiPendulum(RIGHT, LEFT)
-                    self.add(p)
-                    self.make_rigid_body(p.bobs)
-                    p.start_swinging()
-                    self.add(TracedPath(p.bobs[-1].get_center, stroke_color=BLUE))
-                    self.wait(10)
-        """
-    def __init__(
-        self,
-        transition: Transition,
-        start_state: State,
-        end_state: State,
-        label: str,
-        **kwargs
-    ) -> None:
-        
-        super().__init__()
-
-        self.transition = transition
-
-        self.start_state = start_state
-        self.end_state = end_state
-        #create text object for label
-        self.text = Text(label, font_size=100)
-
-        if start_state == end_state: #create transition that points to itself
-            position_1, position_2 = self.calculate_circle_vertices()
-            self.create_reflexive_arrow(position_1, position_2)
-        else: #start_state ----> end_state
-            self.arrow = Arrow(start_state.manim_state, end_state.manim_state, buff=0.1)
-            self.position_text(self.text)
-        if label: #if the tranistion is given a label (input symbols)
-            self.edge = VGroup(self.arrow, self.text)
-        else:
-            self.edge = VGroup(self.arrow)
-
-        self.add(self.edge)
-
-
-    def calculate_circle_vertices(self):
-        # centre_x = self.start_state
-        # centre_y = 
-        circle = self.start_state.circle
-        
-        p1 = circle.point_at_angle(PI/4 + PI/2)
-        p2 = circle.point_at_angle(PI/4)
-
-        return p1, p2
-
-    def create_reflexive_arrow(self, point1, point2):
-        self.arrow = CurvedArrow(point2, point1, angle=1.5*PI)
-        self.add(self.arrow)
-        
-        center_of_arc = self.arrow.get_arc_center()
-        radius = self.arrow.radius
-
-        #positions the text above the reflexive arrow
-        self.text.move_to(center_of_arc).shift(UP*radius*1.5)
-
-    def calculate_direction_of_arrow_label(self, normal_vector_choice: int = 0):
-        """Calculates the which side of the arrow the label should be placed"""
-        # direction_of_arrow = [self.arrow.get_x(), self.arrow.get_y()]
-        # direction = self.arrow.line.get_normal_vector()
-        #difference of the arrow
-        x1 = None
-        y1 = None
-        if type(self.start_state) == list:
-            x1 = self.start_state[0]
-            y1 = self.start_state[1]
-        else:
-            x1 = self.start_state.manim_state.get_x()
-            y1 = self.start_state.manim_state.get_y()
-
-        x2 = self.end_state.manim_state.get_x()
-        y2 = self.end_state.manim_state.get_y()
-
-        difference_of_x = x2 - x1
-        difference_of_y = y2 - y1
-
-        normalised_values = normalize([difference_of_x, difference_of_y])
-
-        #calculate normal of the line
-        normal_vectors = {
-            0: [-normalised_values[1], normalised_values[0], -1],
-            1: [normalised_values[1], -normalised_values[0], -1]
-        }
-        
-        return normal_vectors[normal_vector_choice]
-
-    def position_text(self, text: Text):
-        """This function positions text next to the arrow as there was no good way to do it with the lib rary"""
-
-        #Obtain coordinates for the centre of the line
-        x1 = None
-        y1 = None
-        if type(self.start_state) == list:
-            x1 = self.start_state[0]
-            y1 = self.start_state[1]
-        else:
-            x1 = self.start_state.manim_state.get_x()
-            y1 = self.start_state.manim_state.get_y()
-
-        x2 = self.end_state.manim_state.get_x()
-        y2 = self.end_state.manim_state.get_y()
-
-        #midpoint
-        c1 = (x1 + x2) / 2
-        c2 = (y1 + y2) / 2
-
-
-        # print(self.calculate_direction_of_arrow_label())
-        #need to use the normal vector to offset the text next to the line
-        offset = [x for x in self.calculate_direction_of_arrow_label()]
-        text_coordinates = [x + y for x, y in zip([c1, c2, 0], offset)]
-
-        text.set_x(text_coordinates[0])
-        text.set_y(text_coordinates[1])
-
-    
-class ManimState(VMobject):
-    def __init__(self, state: State, initial: bool, final: bool):
-        super().__init__()
-
-        self.state = state
-
-        self.circle = Circle(radius=2, color=BLUE)
-        self.manim_state = VGroup(self.circle, Text(state.name, font_size=100))
-
-        self.manim_state.set_x(float(state.x)/10)
-        self.manim_state.set_y(float(state.y*-1)/10) # multiply y by -1 to flip the y axis, more similar to JFLAP
- 
-        if initial:
-            self.set_to_initial_state()
-        if final:
-            self.set_to_final_state()
-
-        self.add(self.manim_state)
-
-    def set_to_final_state(self):
-        state_outer = Circle(radius=self.manim_state.width*0.4, color=BLUE)
-        #move x and y of outerloop to be in the same position as parameter:state
-        state_outer.set_x(self.manim_state.get_x())
-        state_outer.set_y(self.manim_state.get_y())
-        self.manim_state = final_state = VGroup(self.manim_state, state_outer)
-        self.add(self.manim_state)
-
-    def set_to_initial_state(self):
-        arrow = Arrow(start=LEFT * 5, end=self.manim_state, color=BLUE, buff=0.1, tip_style={'stroke_width': 5})
-        # self.manim_state = VGroup(arrow, self.manim_state)
-        self.add(arrow)
+default_animation_style = {
+    "animate_transition": {
+        "animation_function": ShowPassingFlash,
+        "accept_color": GREEN,
+        "reject_color": RED,
+        "run_time": 2,
+        "time_width": 2
+    },
+    "highlight_state": {
+        "color": YELLOW
+    },
+    "token_highlight": {
+        "animation_function": Indicate,
+        "color": YELLOW
+    }
+}
 
 
 class ManimAutomaton(VGroup):
+    """Class that describes the graphical representation of a State instance,
+    it is also used to simulate automata.
+
+    Parameters
+    ----------
+    automata_template
+        State instance that the Mobject is modelled from.
+    **kwargs
+        Key words arguments for the VGroup.
+
+    Attributes
+    ----------
+    automaton
+        pass
+    initial_state
+        pass
+    origin_offset_x
+        pass
+    origin_offset_y
+        pass
+    manim_states
+        pass
+    manim_transitions
+        pass
+    """
 
     manim_states = {}
     manim_transitions = []
     
-    def __init__(self, automata_templete=None, **kwargs):
+    def __init__(self, automata_templete=None, xml_file=None, camera_follow=False, animation_style=default_animation_style, **kwargs) -> None:
         super().__init__(**kwargs)
+
+        self.animation_style = animation_style
+        self.camera_follow = camera_follow
+        # default animation style
+        # and allow users to pass in functions that replace some of the functionality such as play_accept..
+
         if automata_templete:
             pass
         #composite relationship
-        self.automaton = FiniteStateAutomaton(xml_file='x_contains_a_1_in_third_final_position.jff')
+        self.automaton = FiniteStateAutomaton(xml_file=xml_file)
         
         #calculate origin shift and normalise coordinates to manim coordinate system
         for state in self.automaton.states:
@@ -226,11 +86,10 @@ class ManimAutomaton(VGroup):
             state.x = float(state.x) - self.origin_offset_x
             state.y = float(state.y) - self.origin_offset_y
 
-            
         #build the visualisation of the automaton
         for state in self.automaton.states:
             # manim_state = self.create_manim_state(state)
-            manim_state = ManimState(state, state.initial, state.final)
+            manim_state = ManimState(state, animation_style=self.animation_style)
             self.manim_states[state.name] = manim_state
             self.add(manim_state)
     
@@ -238,14 +97,14 @@ class ManimAutomaton(VGroup):
             manim_state_from = self.manim_states[transition.transition_from.name] #lookup manim state using dict
             manim_state_to = self.manim_states[transition.transition_to.name] #lookup manim state using dict
 
-            manim_transition = ManimTransition(transition, manim_state_from, manim_state_to, transition.input_symbol)
+            manim_transition = ManimTransition(transition, manim_state_from, manim_state_to, transition.input_symbol, animation_style=self.animation_style)
             self.manim_transitions.append(manim_transition)
         
         for manim_transition in self.manim_transitions:
             self.add(manim_transition)
 
 
-    def create_manim_transition(self, start_state, end_state, label=None):
+    def create_manim_transition(self, start_state, end_state, label=None) -> "ManimTransition":
         if start_state == end_state: #create transition that points to itself
             transition = Arrow([-1, 2, 0], start_state, buff=0) #refactor this to look better
         else: #start_state ----> end_state
@@ -258,22 +117,22 @@ class ManimAutomaton(VGroup):
 
         return transition
 
-    def get_initial_state(self):
+    def get_initial_state(self) -> "State":
         return self.automaton.get_initial_state()
 
-    def get_manim_transition(self, transition_id: int): #incorrect solution TODO
+    def get_manim_transition(self, transition_id: int) -> "ManimTransition": #incorrect solution TODO
         for manim_transition in self.manim_transitions:
             if manim_transition.transition.id == transition_id:
                 return manim_transition
 
-    def get_manim_state(self, state: State):
+    def get_manim_state(self, state: State) -> "ManimState":
         return self.manim_states[state.name]
         
 
     #returns a list of animations to run through
-    def play_string(self, input_string: str) -> None:
+    def play_string(self, input_string: str) -> list:
         #create mobject of input string
-        self.manim_automata_input = ManimAutomataInput(input_string)
+        self.manim_automata_input = ManimAutomataInput(input_string, animation_style=self.animation_style)
         #stores a list of animations that is returned to scene
         list_of_animations = []
         
@@ -303,44 +162,39 @@ class ManimAutomaton(VGroup):
             if step_result is True:
                 #move state_pointer to next state
                 if next_state:
-                    list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=BLUE)])
+                    list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=BLUE), FadeToColor(self.manim_states[next_state.name], color=YELLOW)])
                     state_pointer = next_state
-                    list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=YELLOW)])
             else: #if step fails then stop play process early as the string is not accepted
-                # return False
-                # list_of_animations.append(self.rejected())
-                # list_of_animations.append([FadeToColor(self, color=RED)])
                 text = Text("REJECTED", color=RED)
                 text.set_x(token.get_x())
                 text.set_y(token.get_y())
-                list_of_animations.append([FadeToColor(self.manim_automata_input, color=RED)])
 
-                #turn the remaining tokens on the sceen to the "reject" text mobject
-                number_of_remaining_tokens = len(self.manim_automata_input.tokens) - i
-                remaining_tokens = VGroup(*self.manim_automata_input[number_of_remaining_tokens:])
-                list_of_animations.append([Transform(remaining_tokens, text)])
+                list_of_animations.append([FadeToColor(self.manim_automata_input, color=RED)])
+                list_of_animations.append([Transform(self.manim_automata_input, text)])
 
                 return list_of_animations
 
         #check that the current state_pointer is a final state
         if state_pointer.final:
-            text = Text("Accepted", color=GREEN)
-            text.set_x(-1)
-            text.set_y(4)
-            list_of_animations.append([FadeToColor(self, color=GREEN), FadeIn(text)])
-            # list_of_animations.append(self.accepted())
+            text = Text("ACCEPTED", color=GREEN)
+            text.set_x(token.get_x())
+            text.set_y(token.get_y())
+
+            list_of_animations.append([Transform(self.manim_automata_input, text)])
+            list_of_animations.append([FadeToColor(self, color=GREEN)])
         else:
             text = Text("REJECTED", color=RED)
-            text.set_x(-1)
-            text.set_y(4)
-            list_of_animations.append([FadeToColor(self, color=RED), FadeIn(text)])
-            # list_of_animations.append(self.rejected())
-
+            text.set_x(token.get_x())
+            text.set_y(token.get_y())
+            
+            list_of_animations.append([Transform(self.manim_automata_input, text)])
+            list_of_animations.append([FadeToColor(self, color=RED)])
+           
         return list_of_animations
  
         
 
-    def step(self, manim_transition: ManimTransition, token: str, state_pointer, result: bool):
+    def step(self, manim_transition: ManimTransition, token: Text, state_pointer: State, result: bool) -> list:
         #creates a list of animations for the step
         list_of_step_animations = []
         if manim_transition == None: #there is no possible transition
@@ -349,47 +203,32 @@ class ManimAutomaton(VGroup):
             )
         else:
             #move camera with every state, using the state_pointer
-            # self. = manim_state
-            # if self.camera_follow_state is True: #need someway to replace
-            #     list_of_step_animations.append(
-            #         self.camera.frame.animate.move_to(self.manim_automaton.get_manim_state(state_pointer)).scale(1)
-            #     )
+            if self.camera_follow is True: #need someway to replace
+                # list_of_step_animations.append(
+                #     self.camera.frame.animate.move_to(self.get_manim_state(state_pointer)).scale(1)
+                # )
+                pass
+
 
             list_of_step_animations.append(
-                Indicate(token)
-            )
-            
-            list_of_step_animations.append(
-                Transform(token, manim_transition)
+                ManimAutomataInput.highlight_token(token, self.animation_style)
             )
 
-            # self.remove(token) # removes the token once it has transformed
+
             if result is True:
                 list_of_step_animations.append(
-                    ShowPassingFlash(
-                        manim_transition.arrow.copy().set_color(GREEN),
-                        run_time=2,
-                        time_width=2
-                    )
-                )
-                list_of_step_animations.append(
-                    Flash(manim_transition.text, color=GREEN)
+                    manim_transition.animate_transition(True)
                 )
 
-
-                list_of_step_animations.append(
-                    ShowPassingFlash(token, color=GREEN)
-                    # manim_transition.animate.set_color(GREEN) # create a custom animation to signify result
-                )
             else:
                 list_of_step_animations.append(
-                    manim_transition.animate.set_color(RED) # create a custom animation to signify result
+                    manim_transition.animate_transition(False)
                 )
         
         return list_of_step_animations
 
 
-    def set_default_position_of_input_string(self):
+    def set_default_position_of_input_string(self) -> list:
         list_of_input_string_animations = []
         #get centre of self
         c1 = self.get_x()
@@ -402,3 +241,19 @@ class ManimAutomaton(VGroup):
 
         return list_of_input_string_animations
         
+
+    def parse_animation_style(self):
+        pass
+
+
+    def build_animation(self, animation_function, color, subject, **kwargs):
+        """Build and returns line of animation code"""
+        animation_function()
+
+        return animation_function
+
+
+    def move_camera(self):
+
+        # self.camera.frame.animate.move_to(self.get_manim_state(state_pointer)).scale(1)
+        pass
