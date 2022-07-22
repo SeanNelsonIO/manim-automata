@@ -1,4 +1,3 @@
 __version__ = "0.1.3"
-__all__ = ["DotGrid", "State", "ManimAutomaton"]
-from .mobjects.dotgrid import *
+__all__ = ["State", "ManimAutomaton"]
 from .mobjects.automaton_mobject import *

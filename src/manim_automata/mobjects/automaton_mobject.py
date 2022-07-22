@@ -1,10 +1,10 @@
 from manim import *
-from manim_automata.mobjects.automaton_animation import AnimateStep
 from src.manim_automata.automata_dependencies.automata import FiniteStateAutomaton
 from src.manim_automata.mobjects.manim_state import ManimState, State
 from src.manim_automata.mobjects.manim_automaton_input import ManimAutomataInput
 from src.manim_automata.mobjects.manim_transition import ManimTransition
 
+from typing import Union
 
 __all__ = ["ManimAutomaton"]
 
@@ -99,9 +99,6 @@ class ManimAutomaton(VGroup):
             self.add(manim_state)
 
     def construct_manim_transitions(self):
-        
-
-
         for transition in self.automaton.transitions:
             manim_state_from = self.manim_states[transition.transition_from.name] #lookup manim state using dict
             manim_state_to = self.manim_states[transition.transition_to.name] #lookup manim state using dict
@@ -136,11 +133,15 @@ class ManimAutomaton(VGroup):
     def get_manim_state(self, state: State) -> "ManimState":
         return self.manim_states[state.name]
         
-
+    def construct_automaton_input(self, input_string: str) -> "ManimAutomataInput":
+        return ManimAutomataInput(input_string, animation_style=self.animation_style)
+        
     #returns a list of animations to run through
-    def play_string(self, input_string: str) -> list:
-        #create mobject of input string
-        self.manim_automata_input = ManimAutomataInput(input_string, animation_style=self.animation_style)
+    def play_string(self, input: Union[str,"ManimAutomataInput"]) -> list:
+        if type(input) is str:
+            #create mobject of input string
+            self.manim_automata_input = self.construct_automaton_input(input_string)
+        else: self.manim_automata_input = input #if input is already an instance of ManimAutomataInput
         #stores a list of animations that is returned to scene
         list_of_animations = []
         
