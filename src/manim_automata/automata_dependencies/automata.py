@@ -1,6 +1,8 @@
 from .xml_parser import parse_xml_file
 import itertools
 
+import gc #need a way of getting instances of class without gc TODO
+
 class State:
     """Class that represents states.
 
@@ -44,7 +46,7 @@ class State:
         #list of transitions links this state to others
         self.links = []
 
-    def add_transition(self, transition: "Transition") -> None:
+    def add_transition_to_state(self, transition: "Transition") -> None:
         self.links.append(transition)
 
     def get_transitions(self) -> list["Transition"]:
@@ -52,6 +54,13 @@ class State:
 
     def get_transition(self, index: int) -> "Transition": #DEPRECATED
         return self.links[index]
+
+    @staticmethod
+    def get_state_by_id(id): #need a much faster function TODO
+        for obj in gc.get_objects():
+            if isinstance(obj, State):
+                if obj.id == id:
+                    return obj
 
     def __str__(self) -> str:
         return 'State id: {self.id}, name: {self.name}'.format(self=self)
@@ -80,13 +89,14 @@ class Transition:
     """
     id_iter = itertools.count()
 
-    def __init__(self, transition_from: State, transition_to: State, input_symbol: str) -> None:
+    def __init__(self, transition_from: State, transition_to: State, read_symbols: list) -> None:
         self.id = next(self.id_iter)
         self.transition_from = transition_from
         self.transition_to = transition_to
-        self.input_symbol = input_symbol
+        self.read_symbols = read_symbols
 
-        #when creating a transition add the transition to the states
+        #when creating a transition add the transition to the states TODO
+
         
 
 class Automaton:
@@ -120,16 +130,12 @@ class FiniteStateAutomaton(Automaton):
             json_dictionary = parse_xml_file(xml_file)
             if not isinstance(json_dictionary, dict):
                 exit()
-
+            
             states = json_dictionary["structure"]["automaton"]["state"]
             transitions = json_dictionary["structure"]["automaton"]["transition"]
             
-            #sort states, just in case they are not in order TODO
-
-            for state in states: #create states
-                self.add_state(state)
-
-            self.add_transitions(transitions)
+            self.construct_states(states)
+            self.construct_transitions(transitions)
         
         else: return False
         
@@ -151,25 +157,48 @@ class FiniteStateAutomaton(Automaton):
         #check if final exist in state
         self.states.append(State(state["@name"], state["x"], state["y"], initial=initial, final=final))
 
-    def add_transitions(self, transitions: list[dict]) -> None: #function slow, REFACTOR!
-        #go through each transition, fetch the corresponding state and add the transition to state
+
+    def construct_states(self, states):
+        #sort states, just in case they are not in order TODO
+        for state in states:
+                self.add_state(state)
+
+    def construct_transitions(self, transitions: list[dict]) -> None: #function slow, REFACTOR!
+
+        #counts the number of transitions between two states
+        transition_counter = {}
+        # for transition in self.automaton.transitions:
+        #if 2 or more transitions exist between states then this will merge them together in one transition.
         for transition in transitions:
-            #get states
-            from_state = None
-            to_state = None
-            transition_symbols = transition['read']
+            """put from and to states into tuple to be used as
+            dictionary key."""
+            state_key = (transition['from'], transition['to'])
+            
+            
+            transition_group = transition_counter.setdefault(state_key, [])#if key doesn't exist then create new key list pair
+            transition_group.append(transition['read']) #append transition read value to transition[state_key]
 
-            for state in self.states:
-                if state.id == int(transition['from']):
-                    from_state = state
-                if state.id == int(transition['to']):
-                    to_state = state
 
-            if from_state and to_state: #if states exist create transition
-                new_transition = Transition(from_state, to_state, transition_symbols)
-                self.transitions.append(new_transition)
-                #add the transition to the from_states link list
-                from_state.add_transition(new_transition)
+        for state_key in transition_counter:
+            self.add_transition(state_key, transition_counter[state_key])
+
+
+    def add_transition(self, state_key: tuple, read_values: list) -> None:
+        
+        from_state = State.get_state_by_id(int(state_key[0]))
+        to_state = State.get_state_by_id(int(state_key[1]))
+
+        print("state:", from_state, to_state)
+
+        new_transition = Transition(from_state, to_state, read_values)
+        self.transitions.append(new_transition)
+
+        #add the transition to the from_states link list
+        from_state.add_transition_to_state(new_transition)
+
+
+
+
 
     def run(self, input_string: str) -> bool:
         current_state = self.get_initial_state() #initial state is the first state in sequence
@@ -191,9 +220,10 @@ class FiniteStateAutomaton(Automaton):
         #go through each transition of this state
         for transition in state_transitions:
             #check if any transition's symbols match the input token
-            if transition.input_symbol == token.text: #currently we pick the first transition that matches if one exists, however this won't work for non-deterministic machines
-                next_state = transition.transition_to
-                return True, next_state, transition.id #the token matches the transition's input
+            for read_symbol in transition.read_symbols: #Iterate through the transtion's read options
+                if read_symbol == token.text: #currently we pick the first transition that matches if one exists, however this won't work for non-deterministic machines
+                    next_state = transition.transition_to
+                    return True, next_state, transition.id #the token matches the transition's input
                 
         return False, next_state, None
 

@@ -73,7 +73,12 @@
 		<transition>
 			<from>3</from>
 			<to>4</to>
-			<read>0,1</read>
+			<read>0</read>
+		</transition>
+		<transition>
+			<from>3</from>
+			<to>4</to>
+			<read>1</read>
 		</transition>
 		<transition>
 			<from>2</from>

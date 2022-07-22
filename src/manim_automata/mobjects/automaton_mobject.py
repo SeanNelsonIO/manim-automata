@@ -1,6 +1,6 @@
 from manim import *
 from manim_automata.mobjects.automaton_animation import AnimateStep
-from src.manim_automata.automata import FiniteStateAutomaton
+from src.manim_automata.automata_dependencies.automata import FiniteStateAutomaton
 from src.manim_automata.mobjects.manim_state import ManimState, State
 from src.manim_automata.mobjects.manim_automaton_input import ManimAutomataInput
 from src.manim_automata.mobjects.manim_transition import ManimTransition
@@ -15,7 +15,7 @@ default_animation_style = {
         "animation_function": ShowPassingFlash,
         "accept_color": GREEN,
         "reject_color": RED,
-        "run_time": 2,
+        "run_time": 0.5,
         "time_width": 2
     },
     "highlight_state": {
@@ -71,7 +71,12 @@ class ManimAutomaton(VGroup):
         #composite relationship
         self.automaton = FiniteStateAutomaton(xml_file=xml_file)
         
-        #calculate origin shift and normalise coordinates to manim coordinate system
+        self.construct_manim_states()
+        self.construct_manim_transitions()
+       
+
+    def construct_manim_states(self):
+         #calculate origin shift and normalise coordinates to manim coordinate system
         for state in self.automaton.states:
             #get the inital state (this should be set)
             if state.initial:
@@ -92,17 +97,20 @@ class ManimAutomaton(VGroup):
             manim_state = ManimState(state, animation_style=self.animation_style)
             self.manim_states[state.name] = manim_state
             self.add(manim_state)
-    
+
+    def construct_manim_transitions(self):
+        
+
+
         for transition in self.automaton.transitions:
             manim_state_from = self.manim_states[transition.transition_from.name] #lookup manim state using dict
             manim_state_to = self.manim_states[transition.transition_to.name] #lookup manim state using dict
 
-            manim_transition = ManimTransition(transition, manim_state_from, manim_state_to, transition.input_symbol, animation_style=self.animation_style)
+            manim_transition = ManimTransition(transition, manim_state_from, manim_state_to, transition.read_symbols, animation_style=self.animation_style)
             self.manim_transitions.append(manim_transition)
         
         for manim_transition in self.manim_transitions:
             self.add(manim_transition)
-
 
     def create_manim_transition(self, start_state, end_state, label=None) -> "ManimTransition":
         if start_state == end_state: #create transition that points to itself
@@ -165,25 +173,26 @@ class ManimAutomaton(VGroup):
                     list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=BLUE), FadeToColor(self.manim_states[next_state.name], color=YELLOW)])
                     state_pointer = next_state
             else: #if step fails then stop play process early as the string is not accepted
-                text = Text("REJECTED", color=RED)
+                text = Text("REJECTED", color=RED, font_size=100)
                 text.set_x(token.get_x())
                 text.set_y(token.get_y())
 
-                list_of_animations.append([FadeToColor(self.manim_automata_input, color=RED)])
+                
                 list_of_animations.append([Transform(self.manim_automata_input, text)])
+                list_of_animations.append([FadeToColor(self, color=RED)])
 
                 return list_of_animations
 
         #check that the current state_pointer is a final state
         if state_pointer.final:
-            text = Text("ACCEPTED", color=GREEN)
+            text = Text("ACCEPTED", color=GREEN, font_size=100)
             text.set_x(token.get_x())
             text.set_y(token.get_y())
 
             list_of_animations.append([Transform(self.manim_automata_input, text)])
             list_of_animations.append([FadeToColor(self, color=GREEN)])
         else:
-            text = Text("REJECTED", color=RED)
+            text = Text("REJECTED", color=RED, font_size=100)
             text.set_x(token.get_x())
             text.set_y(token.get_y())
             
@@ -214,16 +223,14 @@ class ManimAutomaton(VGroup):
                 ManimAutomataInput.highlight_token(token, self.animation_style)
             )
 
+            #Animation that highlights the transition - Green for True and red otherwise
+            list_of_step_animations.append(
+                manim_transition.animate_transition(result)
+            )
 
-            if result is True:
-                list_of_step_animations.append(
-                    manim_transition.animate_transition(True)
-                )
-
-            else:
-                list_of_step_animations.append(
-                    manim_transition.animate_transition(False)
-                )
+            list_of_step_animations.append(
+                token.animate.set_opacity(0.5)
+            )
         
         return list_of_step_animations
 

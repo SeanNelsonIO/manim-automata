@@ -19,7 +19,7 @@ def create_automaton_from_dictionary(dictionary):
     #create all the transitions
     #create machine
     deterministic_finite_automaton = deterministic_finite_automaton(dictionary)
-
+    
 
 
 if __name__ == "__main__":

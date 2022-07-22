@@ -1,5 +1,5 @@
 from manim import *
-from src.manim_automata.automata import Transition
+from src.manim_automata.automata_dependencies.automata import Transition
 
 
 class ManimTransition(VGroup):
@@ -36,7 +36,7 @@ class ManimTransition(VGroup):
         transition: Transition,
         start_state: "ManimState",
         end_state: "ManimState",
-        label: str,
+        read_symbols: list,
         animation_style: dict,
         **kwargs
     ) -> None:
@@ -46,19 +46,21 @@ class ManimTransition(VGroup):
 
         self.start_state = start_state
         self.end_state = end_state
-        #create text object for label
-        self.text = Text(label, font_size=100)
+        #create text objects for read_symbols
+        self.manim_read_symbols = []
+        for read_symbol in read_symbols:
+            self.manim_read_symbols.append(Text(read_symbol, font_size=100))
+        
 
         if start_state == end_state: #create transition that points to itself
             position_1, position_2 = self.calculate_circle_vertices()
             self.create_reflexive_arrow(position_1, position_2)
         else: #start_state ----> end_state
             self.arrow = Arrow(start_state, end_state, buff=0)
-            self.position_text(self.text)
-        if label: #if the tranistion is given a label (input symbols)
-             super().__init__(self.arrow, self.text, **kwargs)
-        else:
-             super().__init__(self.arrow, **kwargs)
+            self.position_text()
+            
+        super().__init__(self.arrow, *self.manim_read_symbols, **kwargs)
+        
 
 
     def animate_transition(self, transition_result: bool):
@@ -75,8 +77,6 @@ class ManimTransition(VGroup):
             
 
         return animation_function(self.arrow.copy().set_color(color), run_time=run_time, time_width=time_width)
-
-
 
 
     def calculate_circle_vertices(self) -> tuple[int]:
@@ -128,9 +128,8 @@ class ManimTransition(VGroup):
         
         return normal_vectors[normal_vector_choice]
 
-    def position_text(self, text: Text) -> None:
+    def position_text(self) -> None:
         """This function positions text next to the arrow as there was no good way to do it with the lib rary"""
-
         #Obtain coordinates for the centre of the line
         x1 = None
         y1 = None
@@ -148,11 +147,15 @@ class ManimTransition(VGroup):
         c1 = (x1 + x2) / 2
         c2 = (y1 + y2) / 2
 
+        # normal_offset = [x for x in self.calculate_direction_of_arrow_label()]
+        normal_offset = self.calculate_direction_of_arrow_label()
 
-        #print(self.calculate_direction_of_arrow_label()).
-        #need to use the normal vector to offset the text next to the line.
-        offset = [x for x in self.calculate_direction_of_arrow_label()]
-        text_coordinates = [x + y for x, y in zip([c1, c2, 0], offset)]
+        for index, manim_read_symbol in enumerate(self.manim_read_symbols):
+            buffer = 0.1 #buffer between read_symbols
+            normal_offset[1] = normal_offset[1] * (index+1 + buffer)
 
-        text.set_x(text_coordinates[0])
-        text.set_y(text_coordinates[1])
+            text_coordinates = [x + y for x, y in zip([c1, c2, 0], normal_offset)]
+
+            manim_read_symbol.set_x(text_coordinates[0])
+            manim_read_symbol.set_y(text_coordinates[1])
+        

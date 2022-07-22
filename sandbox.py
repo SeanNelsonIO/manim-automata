@@ -5,7 +5,7 @@ from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton
 
 class Automata(MovingCameraScene):
     def construct(self):
-        manim_automaton = ManimAutomaton(xml_file='x_contains_a_1_in_third_final_position.jff', camera_follow=True)
+        manim_automaton = ManimAutomaton(xml_file='testmachine2.jff', camera_follow=True)
 
         width_of_scene = manim_automaton.width
         height = manim_automaton.height
@@ -27,7 +27,7 @@ class Automata(MovingCameraScene):
         self.play(DrawBorderThenFill(manim_automaton))
         self.play(DrawBorderThenFill(rectangle))
         
-        input_string = "01110"
+        input_string = "11"
 
         for sequence in manim_automaton.play_string(input_string):
             for step in sequence:
