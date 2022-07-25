@@ -1,3 +1,6 @@
+[![Finite State Machine in Manim]([https://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0](https://www.youtube.com/watch?v=Lfq6XD3-aUw).jpg)]([https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HER](https://www.youtube.com/watch?v=Lfq6XD3-aUw)E)
+
+
 Notes
 =====
 The manim-automata plugin currently relies on JFLAP files, future updates will enable the user to create automata without JFLAP.
