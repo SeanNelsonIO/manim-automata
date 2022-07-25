@@ -70,8 +70,10 @@ class Automaton(MovingCameraScene):
                
 ```
 To run the code and generate the video, run:
-   manim -pqh <name_of_script.py> Automaton plugins = manim_automata
 
+* manim -pqh <name_of_script.py> Automaton plugins = manim_automata
+
+   
 XML file used:
 ```
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><!--Created with JFLAP 7.1.--><structure>
