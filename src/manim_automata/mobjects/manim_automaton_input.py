@@ -27,7 +27,7 @@ class ManimAutomataInput(VGroup):
         If the instance is a final state or not.
     """
     def __init__(self, input_string: str, animation_style: dict, font_size: int = 100, **kwargs) -> None:
-        
+
         super().__init__(**kwargs)
 
         self.animation_style = animation_style
@@ -46,7 +46,9 @@ class ManimAutomataInput(VGroup):
             self.add(text_mobject)
             self.tokens.append(text_mobject)
 
-            spacing = spacing + 0.5
+            spacing = spacing + 1
+
+        
 
     @staticmethod
     def highlight_token(token, animation_style):

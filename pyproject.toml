@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "manim-automata"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["Sean Nelson <snelson01010@gmail.com>"]
 
@@ -19,5 +19,3 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.plugins."manim.plugins"]
 "manim_automata" = "module:object.attr"
-
-

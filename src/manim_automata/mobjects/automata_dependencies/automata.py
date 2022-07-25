@@ -188,8 +188,6 @@ class FiniteStateAutomaton(Automaton):
         from_state = State.get_state_by_id(int(state_key[0]))
         to_state = State.get_state_by_id(int(state_key[1]))
 
-        print("state:", from_state, to_state)
-
         new_transition = Transition(from_state, to_state, read_values)
         self.transitions.append(new_transition)
 

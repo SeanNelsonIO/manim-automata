@@ -1,14 +1,12 @@
 from manim import *
-from manim_automata.automata_dependencies.automata import FiniteStateAutomaton
-from manim_automata.mobjects.manim_state import ManimState, State
-from manim_automata.mobjects.manim_automaton_input import ManimAutomataInput
-from manim_automata.mobjects.manim_transition import ManimTransition
+from .automata_dependencies.automata import FiniteStateAutomaton
+from .manim_state import ManimState, State
+from .manim_automaton_input import ManimAutomataInput
+from .manim_transition import ManimTransition
 
 from typing import Union
 
 __all__ = ["ManimAutomaton"]
-
-
 
 default_animation_style = {
     "animate_transition": {
@@ -26,7 +24,6 @@ default_animation_style = {
         "color": YELLOW
     }
 }
-
 
 class ManimAutomaton(VGroup):
     """Class that describes the graphical representation of a State instance,
@@ -141,12 +138,13 @@ class ManimAutomaton(VGroup):
         if type(input) is str:
             #create mobject of input string
             self.manim_automata_input = self.construct_automaton_input(input_string)
+            #position the mobject
+            self.set_default_position_of_input_string()
+            #display manim_automaton_input to the screen
+            list_of_animations.append(FadeIn(self.manim_automata_input))
         else: self.manim_automata_input = input #if input is already an instance of ManimAutomataInput
         #stores a list of animations that is returned to scene
         list_of_animations = []
-        
-        list_of_animations.append(self.set_default_position_of_input_string())
-        
         #Points to the current state
         state_pointer = self.get_initial_state()
         #Highlight current state with yellow
@@ -234,18 +232,15 @@ class ManimAutomaton(VGroup):
         return list_of_step_animations
 
 
-    def set_default_position_of_input_string(self) -> list:
+    def set_default_position_of_input_string(self):
         list_of_input_string_animations = []
         #get centre of self
         c1 = self.get_x()
         c2 = self.get_y()
         #set position of manim_automata_input relative to self
         self.manim_automata_input.set_x(c1)
-        self.manim_automata_input.set_y(c2 + self.height/2)
-        #diplay the manim_automata_input on the screen
-        list_of_input_string_animations.append(FadeIn(self.manim_automata_input))
-
-        return list_of_input_string_animations
+        self.manim_automata_input.set_y(c2 + self.height/4)
+        
         
 
     def parse_animation_style(self):
