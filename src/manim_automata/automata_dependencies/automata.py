@@ -125,19 +125,19 @@ class FiniteStateAutomaton(Automaton):
 
     def __init__(self, json_template=None, xml_file=None) -> None:
         if json_template:
-            pass #extract states and transitions from template if valid
+            json_template #extract states and transitions from template if valid
+            result = FiniteStateAutomaton.validate_json_template(json_template)
+            if result == False:
+                return "Error, json template was not valid, ensure the json object follows the correct structure."
         elif xml_file:
             json_dictionary = parse_xml_file(xml_file)
-            if not isinstance(json_dictionary, dict):
-                exit()
-            
-            states = json_dictionary["structure"]["automaton"]["state"]
-            transitions = json_dictionary["structure"]["automaton"]["transition"]
-            
-            self.construct_states(states)
-            self.construct_transitions(transitions)
-        
         else: return False
+
+        states = json_dictionary["structure"]["automaton"]["state"]
+        transitions = json_dictionary["structure"]["automaton"]["transition"]
+        
+        self.construct_states(states)
+        self.construct_transitions(transitions)
         
 
     def add_state(self, state: dict) -> None:
@@ -236,10 +236,56 @@ class FiniteStateAutomaton(Automaton):
         for state in self.states:
             if state.name == name:
                 return state
-        #create error message here - need to look up standard. TODO
 
+    @staticmethod
+    def validate_json_template(json_template):
+
+        
+
+        stripped_json_template = {
+
+        }
+        
+        #strip json object to bare components to see if it has everything
+        #then create a hash of the object and compare it to the correct template's hash
+
+
+        pass
+
+    def strip_json_template(dictionary):
+
+        if type(key) != dict:
+            return {} # build the dictionary back up
+
+
+        return strip_json_function(value)
+        pass
+        
+        
+
+automaton_json = {
+    'structure': {
+        'type': 'fa',
+        'automaton': {
+            'state': [
+                {'@id': '0', '@name': 'q0', 'x': '84.0', 'y': '122.0', 'initial': None},
+                {'@id': '1', '@name': 'q1', 'x': '218.0', 'y': '175.0'},
+                {'@id': '2', '@name': 'q2', 'x': '386.0', 'y': '131.0', 'final': None},
+                {'@id': '3', '@name': 'q3', 'x': '227.0', 'y': '36.0'}
+            ],
+            'transition': [
+                {'from': '0', 'to': '1', 'read': '0'},
+                {'from': '0', 'to': '1', 'read': '1'},
+                {'from': '2', 'to': '3', 'read': '0'},
+                {'from': '1', 'to': '2', 'read': '1'},
+                {'from': '3', 'to': '0', 'read': '1'},
+                {'from': '3', 'to': '0', 'read': '0'}
+            ]
+        }
+    }
+}
 # class PushdownAutomaton(Automaton): TODO
 #     def __init__(self) -> None:
 #         pass
 
-
+#create error message here - need to look up standard. TODO

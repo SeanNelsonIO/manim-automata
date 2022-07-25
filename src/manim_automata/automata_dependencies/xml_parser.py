@@ -1,6 +1,7 @@
 import json
 import xmltodict
 
+
 # from automata import deterministic_finite_automaton
 
 def parse_xml_file(file_name):

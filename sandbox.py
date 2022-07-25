@@ -3,9 +3,34 @@ from src.manim_automata.mobjects import *
 from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton
 
 
+
+automaton_json = {
+    'structure': {
+        'type': 'fa',
+        'automaton': {
+            'state': [
+                {'@id': '0', '@name': 'q0', 'x': '84.0', 'y': '122.0', 'initial': None},
+                {'@id': '1', '@name': 'q1', 'x': '218.0', 'y': '175.0'},
+                {'@id': '2', '@name': 'q2', 'x': '386.0', 'y': '131.0', 'final': None},
+                {'@id': '3', '@name': 'q3', 'x': '227.0', 'y': '36.0'}
+            ],
+            'transition': [
+                {'from': '0', 'to': '1', 'read': '0'},
+                {'from': '0', 'to': '1', 'read': '1'},
+                {'from': '2', 'to': '3', 'read': '0'},
+                {'from': '1', 'to': '2', 'read': '1'},
+                {'from': '3', 'to': '0', 'read': '1'},
+                {'from': '3', 'to': '0', 'read': '0'}
+            ]
+        }
+    }
+}
+
+
 class Automata(MovingCameraScene):
+    
     def construct(self):
-        manim_automaton = ManimAutomaton(xml_file='testmachine2.jff', camera_follow=True)
+        manim_automaton = ManimAutomaton(automata_templete=automaton_json, xml_file='testmachine2.jff', camera_follow=True)
 
          #creates a frame around manim-automaton
         self.camera.frame.set_width(manim_automaton.width + 2)

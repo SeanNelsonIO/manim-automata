@@ -73,10 +73,10 @@ class ManimAutomaton(VGroup):
         
         self.construct_manim_states()
         self.construct_manim_transitions()
-       
+        
 
     def construct_manim_states(self):
-         #calculate origin shift and normalise coordinates to manim coordinate system
+        #calculate origin shift and normalise coordinates to manim coordinate system
         for state in self.automaton.states:
             #get the inital state (this should be set)
             if state.initial:
@@ -203,7 +203,6 @@ class ManimAutomaton(VGroup):
         return list_of_animations
  
         
-
     def step(self, manim_transition: ManimTransition, token: Text, state_pointer: State, result: bool) -> list:
         #creates a list of animations for the step
         list_of_step_animations = []
@@ -218,7 +217,6 @@ class ManimAutomaton(VGroup):
                 #     self.camera.frame.animate.move_to(self.get_manim_state(state_pointer)).scale(1)
                 # )
                 pass
-
 
             list_of_step_animations.append(
                 ManimAutomataInput.highlight_token(token, self.animation_style)
