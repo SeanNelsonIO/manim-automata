@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "manim-automata"
-version = "0.1.13"
+version = "0.1.14"
 description = "A Manim implementation of Automata"
 license = "MIT"
 authors = ["Sean Nelson <snelson01010@gmail.com>"]
