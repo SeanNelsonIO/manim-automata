@@ -36,7 +36,6 @@ Example
 =======
 ```python
 class Automaton(MovingCameraScene):
-    
     def construct(self):
         manim_automaton = ManimAutomaton(xml_file='example_machine.jff')
 
@@ -45,13 +44,19 @@ class Automaton(MovingCameraScene):
         self.camera.frame.set_height(manim_automaton.height + 10)
         self.camera.frame.move_to(manim_automaton)
 
-        self.play(DrawBorderThenFill(manim_automaton))
+        #Create an mobject version of input for the manim_automaton
+        automaton_input = manim_automaton.construct_automaton_input("110011")
 
+        #Position automaton_input on the screen.
+        automaton_input.shift(LEFT * 2)
+        automaton_input.shift(UP * 10)
 
-        #create an mobject version of input for the manim_automaton
-        automaton_input = manim_automaton.construct_automaton_input("11")
+        self.play(
+                DrawBorderThenFill(manim_automaton),
+                FadeIn(automaton_input)
+            )
 
-        #play all the animations generate from .play_string()
+        #Play all the animations generate from .play_string()
         for sequence in manim_automaton.play_string(automaton_input):
             for step in sequence:
                 self.play(step, run_time=1)
