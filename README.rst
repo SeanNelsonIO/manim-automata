@@ -1,4 +1,21 @@
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-   :target: https://github.com/psf/black
-.. image:: https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336
-    :target: https://pycqa.github.io/isort/
+Installation
+============
+To install manim-automata plugin run:
+.. code-block:: bash
+   pip install manim-automata
+
+To see which version of manim-automata you have:
+.. code-block:: bash
+    manim-automata
+
+or
+
+.. code-block:: bash
+    pip list
+
+
+Importing
+=========
+To use manim-automata in your project, you can:
+* Add ``from manim_automata import *`` to your script.
+Once manim-automata has been imported, you can use the ManimAutomata class to create automata.
