@@ -16,7 +16,6 @@ jobs:
         run: echo "${HOME}/.poetry/bin" >> $GITHUB_PATH
       - run: poetry install
       - run: poetry config pypi-token.pypi "${{ secrets.PYPI_PASSWORD }}"
+      - run: poetry version $(git describe --tags --abbrev=0)
       - name: Publish package
-        run:
-        poetry version $(git describe --tags --abbrev=0)
-        yes | poetry publish --build
+        run: yes | poetry publish --build
