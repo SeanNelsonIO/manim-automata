@@ -1,5 +1,5 @@
 from manim import *
-from src.manim_automata.automata_dependencies.automata import State
+from manim_automata.automata_dependencies.automata import State
 
 
 

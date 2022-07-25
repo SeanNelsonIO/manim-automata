@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "manim-automata"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Sean Nelson <snelson01010@gmail.com>"]
 

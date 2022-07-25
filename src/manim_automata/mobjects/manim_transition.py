@@ -1,5 +1,5 @@
 from manim import *
-from src.manim_automata.automata_dependencies.automata import Transition
+from manim_automata.automata_dependencies.automata import Transition
 
 
 class ManimTransition(VGroup):

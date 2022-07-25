@@ -1,8 +1,8 @@
 from manim import *
-from src.manim_automata.automata_dependencies.automata import FiniteStateAutomaton
-from src.manim_automata.mobjects.manim_state import ManimState, State
-from src.manim_automata.mobjects.manim_automaton_input import ManimAutomataInput
-from src.manim_automata.mobjects.manim_transition import ManimTransition
+from manim_automata.automata_dependencies.automata import FiniteStateAutomaton
+from manim_automata.mobjects.manim_state import ManimState, State
+from manim_automata.mobjects.manim_automaton_input import ManimAutomataInput
+from manim_automata.mobjects.manim_transition import ManimTransition
 
 from typing import Union
 
