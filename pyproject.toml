@@ -6,9 +6,7 @@ license = "MIT"
 authors = ["Sean Nelson <snelson01010@gmail.com>"]
 readme = "README.md"
 repository = "https://github.com/SeanNelsonIO/manim-automata"
-packages = [
-    { include = "manim_automata" },
-]
+
 
 [tool.poetry.dependencies]
 python = "^3.9"
