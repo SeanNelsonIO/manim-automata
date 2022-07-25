@@ -17,6 +17,6 @@ jobs:
       - run: poetry install
       - run: poetry config pypi-token.pypi "${{ secrets.PYPI_PASSWORD }}"
       - name: Publish package
-        run: |
+        run:
         poetry version $(git describe --tags --abbrev=0)
         yes | poetry publish --build
