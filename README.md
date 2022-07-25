@@ -1,4 +1,8 @@
-[![Finite State Machine in Manim]([https://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0](https://www.youtube.com/watch?v=Lfq6XD3-aUw).jpg)]([https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HER](https://www.youtube.com/watch?v=Lfq6XD3-aUw)E)
+
+YOUTUBE VIDEO EXAMPLE
+=====================
+[![Finite State Machine in Manim](https://img.youtube.com/vi/Lfq6XD3-aUw/0.jpg)](https://www.youtube.com/watch?v=Lfq6XD3-aUw)
+
 
 
 Notes
