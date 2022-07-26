@@ -219,7 +219,7 @@ class FiniteStateAutomaton(Automaton):
         for transition in state_transitions:
             #check if any transition's symbols match the input token
             for read_symbol in transition.read_symbols: #Iterate through the transtion's read options
-                if read_symbol == token.text: #currently we pick the first transition that matches if one exists, however this won't work for non-deterministic machines
+                if read_symbol == token.tex_string: #currently we pick the first transition that matches if one exists, however this won't work for non-deterministic machines
                     next_state = transition.transition_to
                     return True, next_state, transition.id #the token matches the transition's input
                 

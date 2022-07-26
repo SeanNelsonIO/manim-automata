@@ -26,7 +26,7 @@ class ManimState(VGroup):
     def __init__(self, state: State, animation_style: dict, **kwargs) -> None:
         self.animation_style = animation_style
         self.state = state
-        self.text = Text(state.name, font_size=100)
+        self.text = Tex(state.name, font_size=100)
 
         self.circle = Circle(radius=2, color=BLUE)
         # self.manim_state = VGroup(self.circle, self.text)

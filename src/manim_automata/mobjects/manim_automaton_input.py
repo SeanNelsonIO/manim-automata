@@ -36,7 +36,7 @@ class ManimAutomataInput(VGroup):
         self.tokens = []
         spacing = 0
         for token in input_string:
-            text_mobject = Text(token, font_size=font_size)
+            text_mobject = Tex(token, font_size=font_size)
             # text_mobject.set_x(self.get_x())
             # text_mobject.set_y(self.get_y())
 

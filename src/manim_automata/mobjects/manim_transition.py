@@ -49,7 +49,7 @@ class ManimTransition(VGroup):
         #create text objects for read_symbols
         self.manim_read_symbols = []
         for read_symbol in read_symbols:
-            self.manim_read_symbols.append(Text(read_symbol, font_size=100))
+            self.manim_read_symbols.append(Tex(read_symbol, font_size=100))
         
 
         if start_state == end_state: #create transition that points to itself

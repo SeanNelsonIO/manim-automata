@@ -113,7 +113,7 @@ class ManimAutomaton(VGroup):
             transition = Arrow(start_state, end_state, buff=0)
         
         if label: #if the tranistion is given a label (input symbols)
-            text = Text(label, font_size=30)
+            text = Tex(label, font_size=30)
             text.next_to(transition, direction=UP*CENTER, buff=0)
             transition = VGroup(transition, text)
 
@@ -172,7 +172,7 @@ class ManimAutomaton(VGroup):
                     list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=BLUE), FadeToColor(self.manim_states[next_state.name], color=YELLOW)])
                     state_pointer = next_state
             else: #if step fails then stop play process early as the string is not accepted
-                text = Text("REJECTED", color=RED, font_size=100)
+                text = Tex("REJECTED", color=RED, font_size=100)
                 text.set_x(token.get_x())
                 text.set_y(token.get_y())
 
@@ -184,14 +184,14 @@ class ManimAutomaton(VGroup):
 
         #check that the current state_pointer is a final state
         if state_pointer.final:
-            text = Text("ACCEPTED", color=GREEN, font_size=100)
+            text = Tex("ACCEPTED", color=GREEN, font_size=100)
             text.set_x(token.get_x())
             text.set_y(token.get_y())
 
             list_of_animations.append([Transform(self.manim_automata_input, text)])
             list_of_animations.append([FadeToColor(self, color=GREEN)])
         else:
-            text = Text("REJECTED", color=RED, font_size=100)
+            text = Tex("REJECTED", color=RED, font_size=100)
             text.set_x(token.get_x())
             text.set_y(token.get_y())
             
@@ -201,7 +201,7 @@ class ManimAutomaton(VGroup):
         return list_of_animations
  
         
-    def step(self, manim_transition: ManimTransition, token: Text, state_pointer: State, result: bool) -> list:
+    def step(self, manim_transition: ManimTransition, token: "Tex", state_pointer: State, result: bool) -> list:
         #creates a list of animations for the step
         list_of_step_animations = []
         if manim_transition == None: #there is no possible transition
