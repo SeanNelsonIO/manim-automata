@@ -1,4 +1,5 @@
 media/
+dist/
 
-sandbox.py
-*.jff
+example.py
+example_machine.jff

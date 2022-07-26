@@ -45,16 +45,17 @@ Example
 class Automaton(MovingCameraScene):
     def construct(self):
         manim_automaton = ManimAutomaton(xml_file='example_machine.jff')
-
+        
         #Adjust camera frame to fit ManimAutomaton in scene
-        self.camera.frame.set_width(manim_automaton.width + 10)
-        self.camera.frame.set_height(manim_automaton.height + 10)
-        self.camera.frame.move_to(manim_automaton)
+        self.camera.frame_width = manim_automaton.width + 10
+        self.camera.frame_height = manim_automaton.height + 10
+        self.camera.frame.move_to(manim_automaton) 
+
 
         #Create an mobject version of input for the manim_automaton
         automaton_input = manim_automaton.construct_automaton_input("110011")
 
-        #Position automaton_input on the screen.
+        #Position automaton_input on the screen to avoid overlapping.
         automaton_input.shift(LEFT * 2)
         automaton_input.shift(UP * 10)
 
@@ -63,17 +64,15 @@ class Automaton(MovingCameraScene):
                 FadeIn(automaton_input)
             )
 
-        #Play all the animations generate from .play_string()
+        # Play all the animations generate from .play_string()
         for sequence in manim_automaton.play_string(automaton_input):
             for step in sequence:
                 self.play(step, run_time=1)
-               
 ```
 To run the code and generate the video, run:
 
-* manim -pqh <name_of_script.py> Automaton plugins = manim_automata
+* manim -pqh <name_of_script.py> Automaton
 
-   
 XML file used:
 ```
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><!--Created with JFLAP 7.1.--><structure>
