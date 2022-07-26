@@ -1,6 +1,6 @@
 from manim import *
-# from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton
-from manim_automata import *
+from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton
+# from manim_automata import *
 
 
 class Automaton(MovingCameraScene):

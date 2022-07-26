@@ -73,6 +73,7 @@ To run the code and generate the video, run:
 
 * manim -pqh <name_of_script.py> Automaton
 
+
 XML file used:
 ```
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><!--Created with JFLAP 7.1.--><structure>
