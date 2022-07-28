@@ -6,6 +6,8 @@ from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton
 class Automaton(MovingCameraScene):
     def construct(self):
         manim_automaton = ManimAutomaton(xml_file='example_machine.jff')
+
+        manin = 1
         
         #Adjust camera frame to fit ManimAutomaton in scene
         self.camera.frame_width = manim_automaton.width + 10
