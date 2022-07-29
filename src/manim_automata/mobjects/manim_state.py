@@ -3,7 +3,7 @@ from .automata_dependencies.automata import State
 
 
 
-class ManimState(VGroup):
+class ManimState(State, VGroup):
     """Class that describes the graphical representation of a State instance,
     it is also used to simulate tautomata.
 
@@ -23,29 +23,29 @@ class ManimState(VGroup):
     text
         Text Mobject representation of the name from State instance.
     """
-    def __init__(self, state: State, animation_style: dict, **kwargs) -> None:
-        self.animation_style = animation_style
-        self.state = state
-        self.text = Tex(state.name, font_size=100)
+    def __init__(self, name: str, x: int, y: int, initial: bool = None, final: bool = None, **kwargs) -> None:
 
+        State.__init__(self, name=name, x=x, y=y, initial=initial, final=final)
+
+        self.text = Tex(name, font_size=100)
         self.circle = Circle(radius=2, color=BLUE)
-        # self.manim_state = VGroup(self.circle, self.text)
-        super().__init__(self.circle, self.text, **kwargs)
 
-        self.set_x(float(state.x)/10)
-        self.set_y(float(state.y*-1)/10) # multiply y by -1 to flip the y axis, more similar to JFLAP
+        VGroup.__init__(self, self.circle, self.text, **kwargs)
+
+        self.set_x(float(x)/10)
+        self.set_y((float(y)*-1)/10) # multiply y by -1 to flip the y axis, more similar to JFLAP
  
-        if state.initial:
+        if self.initial:
             self.set_to_initial_state()
-        if state.final:
+        if self.final:
             self.set_to_final_state()
 
 
     def set_to_final_state(self) -> None:
-        state_outer = Circle(radius=self.width*0.4, color=BLUE)
+        state_outer = Circle(radius=self.width*0.25, color=BLUE)
         #move x and y of outerloop to be in the same position as parameter:state
-        state_outer.set_x(self.get_x())
-        state_outer.set_y(self.get_y())
+        state_outer.set_x(self.x)
+        state_outer.set_y(self.y)
         self.add(state_outer)
 
     def set_to_initial_state(self) -> None:

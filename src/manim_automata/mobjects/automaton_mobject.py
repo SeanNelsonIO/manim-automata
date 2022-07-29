@@ -55,7 +55,7 @@ class ManimAutomaton(VGroup):
     manim_states = {}
     manim_transitions = []
     
-    def __init__(self, automata_templete=None, xml_file=None, camera_follow=False, animation_style=default_animation_style, **kwargs) -> None:
+    def __init__(self, json_template=None, xml_file=None, camera_follow=False, animation_style=default_animation_style, **kwargs) -> None:
         super().__init__(**kwargs)
 
         self.animation_style = animation_style
@@ -63,13 +63,16 @@ class ManimAutomaton(VGroup):
         # default animation style
         # and allow users to pass in functions that replace some of the functionality such as play_accept..
 
-        if automata_templete:
-            pass
-        #composite relationship
-        self.automaton = FiniteStateAutomaton(xml_file=xml_file)
+        if json_template:
+            self.automaton = FiniteStateAutomaton(json_template==json_template)
+            self.construct_manim_states()
+            self.construct_manim_transitions()
+        elif xml_file:
+            self.automaton = FiniteStateAutomaton(xml_file=xml_file)
+            self.construct_manim_states()
+            self.construct_manim_transitions()
         
-        self.construct_manim_states()
-        self.construct_manim_transitions()
+        
         
 
     def construct_manim_states(self):

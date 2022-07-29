@@ -23,6 +23,8 @@ class State:
     ----------
     id
         The instance's id.
+    name
+        The class' name.
     x
         The value that represents the instance's position on the x-axis.
     y
