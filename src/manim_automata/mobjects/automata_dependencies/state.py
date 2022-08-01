@@ -44,12 +44,5 @@ class State:
     def get_transition(self, index: int) -> "Transition": #DEPRECATED
         return self.links[index]
 
-    # @staticmethod
-    # def get_state_by_id(id): #need a much faster function TODO
-    #     for obj in gc.get_objects():
-    #         if isinstance(obj, State):
-    #             if obj.id == id:
-    #                 return obj
-
     def __str__(self) -> str:
         return 'State id: {self.id}, name: {self.name}'.format(self=self)

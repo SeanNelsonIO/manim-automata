@@ -1,5 +1,5 @@
 from manim import *
-from src.manim_automata.mobjects.automaton_mobject import ManimAutomaton, ManimState
+from src.manim_automata.mobjects.manim_finite_state_automaton import ManimAutomaton, ManimState
 # from manim_automata import *
 
 
