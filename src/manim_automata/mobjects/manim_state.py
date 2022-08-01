@@ -23,29 +23,32 @@ class ManimState(State, VGroup):
     text
         Text Mobject representation of the name from State instance.
     """
-    def __init__(self, name: str, x: int, y: int, initial: bool = None, final: bool = None, **kwargs) -> None:
+    def __init__(self, name: str, x: float, y: float, animation_style: dict, initial: bool = None, final: bool = None, scaling=10, **kwargs) -> None:
+        State.__init__(self, name=name, initial=initial, final=final)
 
-        State.__init__(self, name=name, x=x, y=y, initial=initial, final=final)
-
+        #manim settings for animations and colors
+        self.animation_style = animation_style
+        
         self.text = Tex(name, font_size=100)
         self.circle = Circle(radius=2, color=BLUE)
+    
+        VGroup.__init__(self, self.circle, self.text, name=name, **kwargs)
 
-        VGroup.__init__(self, self.circle, self.text, **kwargs)
+        self.set_x(x/scaling)
+        self.set_y((y*-1)/scaling) # multiply y by -1 to flip the y axis, more similar to JFLAP
 
-        self.set_x(float(x)/10)
-        self.set_y((float(y)*-1)/10) # multiply y by -1 to flip the y axis, more similar to JFLAP
- 
-        if self.initial:
-            self.set_to_initial_state()
+
         if self.final:
             self.set_to_final_state()
-
-
+        if self.initial:
+            self.set_to_initial_state()
+        
+        
     def set_to_final_state(self) -> None:
-        state_outer = Circle(radius=self.width*0.25, color=BLUE)
+        state_outer = Circle(radius=self.width*0.4, color=BLUE)
         #move x and y of outerloop to be in the same position as parameter:state
-        state_outer.set_x(self.x)
-        state_outer.set_y(self.y)
+        state_outer.set_x(self.circle.get_x())
+        state_outer.set_y(self.circle.get_y())
         self.add(state_outer)
 
     def set_to_initial_state(self) -> None:
@@ -55,3 +58,4 @@ class ManimState(State, VGroup):
 
     def highlight_state(self):
         pass
+

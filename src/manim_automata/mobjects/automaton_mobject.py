@@ -25,7 +25,7 @@ default_animation_style = {
     }
 }
 
-class ManimAutomaton(VGroup):
+class ManimAutomaton(FiniteStateAutomaton, VGroup):
     """Class that describes the graphical representation of a State instance,
     it is also used to simulate automata.
 
@@ -52,86 +52,96 @@ class ManimAutomaton(VGroup):
         pass
     """
 
-    manim_states = {}
-    manim_transitions = []
-    
     def __init__(self, json_template=None, xml_file=None, camera_follow=False, animation_style=default_animation_style, **kwargs) -> None:
-        super().__init__(**kwargs)
+        super(FiniteStateAutomaton, self).__init__()
 
         self.animation_style = animation_style
         self.camera_follow = camera_follow
+        
         # default animation style
         # and allow users to pass in functions that replace some of the functionality such as play_accept..
+        
+        super(VGroup, self).__init__(**kwargs)
 
         if json_template:
             self.automaton = FiniteStateAutomaton(json_template==json_template)
             self.construct_manim_states()
             self.construct_manim_transitions()
         elif xml_file:
-            self.automaton = FiniteStateAutomaton(xml_file=xml_file)
-            self.construct_manim_states()
-            self.construct_manim_transitions()
-        
-        
-        
+            self.process_xml(xml_file)
 
-    def construct_manim_states(self):
-        #calculate origin shift and normalise coordinates to manim coordinate system
-        for state in self.automaton.states:
-            #get the inital state (this should be set)
-            if state.initial:
-                self.initial_state = state
+
+        #add manim_states to screen/renderer
+        self.add(*self.states)
+        self.add(*self.transitions)
+
+
+    def add_manim_state(self, manim_state: ManimState):
+        #maybe need validation TODO
+        #adds an already existing manim_state to automaton
+        self.append(manim_state)
+        
+    def construct_state(self, state: dict) -> None: #creates a new manim_state instance
+        #check if initial is set in state
+        initial = False
+        final = False
+        if 'initial' in state.keys():
+            initial = True 
+            #check to see if there is already another initial state
+            for state_object in self.states:
+                if state_object.initial == True: #If there already exists an initial state set back to False and keep first initial state
+                    initial = False
+            
+        if 'final' in state.keys():
+            final = True
+
+        new_x = float(state["x"]) - self.origin_offset_x
+        new_y = float(state["y"]) - self.origin_offset_y
+        #check if final exist in state
+        self.states.append(ManimState(state["@name"], new_x, new_y, animation_style=self.animation_style, initial=initial, final=final))
+
+    def construct_states(self, states):
+        #gets first initial state to calculate offset
+        for state in states: 
+            if 'initial' in state.keys():
                 #store original values, used to normalise coordinates
-                self.origin_offset_x = float(state.x)
-                self.origin_offset_y = float(state.y)
+                self.origin_offset_x = float(state["x"])
+                self.origin_offset_y = float(state["y"])
                 break
         
-        for state in self.automaton.states: #may need to take absolute values to prevent negative values (review)
-            #normalise coordinates by subtracting offsets
-            state.x = float(state.x) - self.origin_offset_x
-            state.y = float(state.y) - self.origin_offset_y
+        for state in states:
+            self.construct_state(state)
+            
+    def construct_transitions(self, transitions):
+        # counts the number of transitions between two states
+        transition_counter = {}
+        # for transition in self.automaton.transitions:
+        #if 2 or more transitions exist between states then this will merge them together in one transition.
+        for transition in transitions:
+            """put from and to states into tuple to be used as
+            dictionary key."""
+            state_key = (transition['from'], transition['to'])
+            
+            transition_group = transition_counter.setdefault(state_key, [])#if key doesn't exist then create new key list pair
+            #if symbol already exists then skip
+            if transition['read'] not in transition_group:
+                transition_group.append(transition['read']) #append transition read value to transition[state_key]
 
-        #build the visualisation of the automaton
-        for state in self.automaton.states:
-            # manim_state = self.create_manim_state(state)
-            manim_state = ManimState(state, animation_style=self.animation_style)
-            self.manim_states[state.name] = manim_state
-            self.add(manim_state)
+        #avoids creating multiple manim_transitions.
+        #Creates one manim_transition with multiple read values
+        for state_key in transition_counter:
+            read_values = transition_counter[state_key]
 
-    def construct_manim_transitions(self):
-        for transition in self.automaton.transitions:
-            manim_state_from = self.manim_states[transition.transition_from.name] #lookup manim state using dict
-            manim_state_to = self.manim_states[transition.transition_to.name] #lookup manim state using dict
+            transition_from = self.get_state_by_id(int(state_key[0]))
+            transition_to = self.get_state_by_id(int(state_key[1]))
 
-            manim_transition = ManimTransition(transition, manim_state_from, manim_state_to, transition.read_symbols, animation_style=self.animation_style)
-            self.manim_transitions.append(manim_transition)
-        
-        for manim_transition in self.manim_transitions:
-            self.add(manim_transition)
+            self.construct_transition(transition_from, transition_to, read_values)
 
-    def create_manim_transition(self, start_state, end_state, label=None) -> "ManimTransition":
-        if start_state == end_state: #create transition that points to itself
-            transition = Arrow([-1, 2, 0], start_state, buff=0) #refactor this to look better
-        else: #start_state ----> end_state
-            transition = Arrow(start_state, end_state, buff=0)
-        
-        if label: #if the tranistion is given a label (input symbols)
-            text = Tex(label, font_size=30)
-            text.next_to(transition, direction=UP*CENTER, buff=0)
-            transition = VGroup(transition, text)
-
-        return transition
-
-    def get_initial_state(self) -> "State":
-        return self.automaton.get_initial_state()
-
-    def get_manim_transition(self, transition_id: int) -> "ManimTransition": #incorrect solution TODO
-        for manim_transition in self.manim_transitions:
-            if manim_transition.transition.id == transition_id:
-                return manim_transition
-
-    def get_manim_state(self, state: State) -> "ManimState":
-        return self.manim_states[state.name]
+    def construct_transition(self, transition_from: ManimState, transition_to: ManimState, read_symbols: list):
+        new_transition = ManimTransition(transition_from, transition_to, read_symbols, animation_style=self.animation_style)
+        self.transitions.append(new_transition)
+        #add the transition to the from_states link list
+        transition_from.add_transition_to_state(new_transition)
         
     def construct_automaton_input(self, input_string: str) -> "ManimAutomataInput":
         return ManimAutomataInput(input_string, animation_style=self.animation_style)
@@ -151,7 +161,7 @@ class ManimAutomaton(VGroup):
         #Points to the current state
         state_pointer = self.get_initial_state()
         #Highlight current state with yellow
-        list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=YELLOW)])
+        list_of_animations.append([FadeToColor(state_pointer, color=YELLOW)])
 
        
         #animate the automaton going through the sequence
@@ -160,10 +170,12 @@ class ManimAutomaton(VGroup):
             if i == len(self.manim_automata_input.tokens)-1:
                 #animate for the final state
                 pass
-            
-            step_result, next_state, transition_id = self.automaton.step(token, state_pointer) #simulates the machine
+    
+            step_result, next_state, transition_id = self.automaton_step(token, state_pointer) #simulates the machine
+
             #get transition with transition id
-            transition = self.get_manim_transition(transition_id)
+            transition = self.get_transition_by_id(int(transition_id))
+            
             
 
             list_of_animations.append(self.step(transition, token, state_pointer, step_result)) # self.step returns a list of animations for that step
@@ -172,7 +184,7 @@ class ManimAutomaton(VGroup):
             if step_result is True:
                 #move state_pointer to next state
                 if next_state:
-                    list_of_animations.append([FadeToColor(self.manim_states[state_pointer.name], color=BLUE), FadeToColor(self.manim_states[next_state.name], color=YELLOW)])
+                    list_of_animations.append([FadeToColor(state_pointer, color=BLUE), FadeToColor(next_state, color=YELLOW)])
                     state_pointer = next_state
             else: #if step fails then stop play process early as the string is not accepted
                 text = Tex("REJECTED", color=RED, font_size=100)

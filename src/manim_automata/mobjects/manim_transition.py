@@ -1,67 +1,55 @@
 from manim import *
 from .automata_dependencies.automata import Transition
 
+from .manim_state import ManimState
 
-class ManimTransition(VGroup):
+class ManimTransition(Transition, VGroup):
     """A Manim Transition. A visual representation of a Transition instance
 
         Parameters
         ----------
-        transition
-            Positions of pendulum bobs.
-        start_state
-            state at which the transition sta
-        end_state
-            Parameters for ``Line``.
-        label
-            Parameters for ``Circle``.
+        transition_from
+            state at which the transition starts
+        transition_to
+            pass
+        read_symbols
+            pass
+        ...
         kwargs
             Additional parameters for ``VMobject``.
-        Examples - do I need this.
-        --------
-        .. manim:: ManimTransitionExample
-
-            from manim_physics import *
-            class MultiPendulumExample(SpaceScene):
-                def construct(self):
-                    p = MultiPendulum(RIGHT, LEFT)
-                    self.add(p)
-                    self.make_rigid_body(p.bobs)
-                    p.start_swinging()
-                    self.add(TracedPath(p.bobs[-1].get_center, stroke_color=BLUE))
-                    self.wait(10)
-        """
+    """
     def __init__(
         self,
-        transition: Transition,
-        start_state: "ManimState",
-        end_state: "ManimState",
+        transition_from: ManimState,
+        transition_to: ManimState,
         read_symbols: list,
         animation_style: dict,
+        font_size = 100,
         **kwargs
     ) -> None:
 
+        Transition.__init__(self, transition_from, transition_to)
+
+        #manim settings for animations and colors
         self.animation_style = animation_style
-        self.transition = transition
+        #store tex mobjects of read_symbols for transitions
+        self.read_symbols = []
 
-        self.start_state = start_state
-        self.end_state = end_state
-        #create text objects for read_symbols
-        self.manim_read_symbols = []
+        #create manim read symbols for transitition
         for read_symbol in read_symbols:
-            self.manim_read_symbols.append(Tex(read_symbol, font_size=100))
+            #Create mobjects of read_symbol
+            self.read_symbols.append(Tex(read_symbol, font_size=font_size))
         
-
-        if start_state == end_state: #create transition that points to itself
+        if self.transition_from == self.transition_to: #create transition that points to itself
             position_1, position_2 = self.calculate_circle_vertices()
             self.create_reflexive_arrow(position_1, position_2)
-        else: #start_state ----> end_state
-            self.arrow = Arrow(start_state, end_state, buff=0)
-            self.position_text()
-            
-        super().__init__(self.arrow, *self.manim_read_symbols, **kwargs)
-        
+        else: #transition_from ----> transition_to
+            self.arrow = Arrow(transition_from, transition_to, buff=0)
+            self.position_text() #- this is causing errors
 
+        
+        VGroup.__init__(self, self.arrow, *self.read_symbols, **kwargs)
+       
 
     def animate_transition(self, transition_result: bool):
         """Animates the arrow of a ManimTransition, color depends on if the transition
@@ -80,9 +68,9 @@ class ManimTransition(VGroup):
 
 
     def calculate_circle_vertices(self) -> tuple[int]:
-        # centre_x = self.start_state
+        # centre_x = self.transition_from
         # centre_y = 
-        circle = self.start_state.circle
+        circle = self.transition_from.circle
         
         p1 = circle.point_at_angle(PI/4 + PI/2)
         p2 = circle.point_at_angle(PI/4)
@@ -92,28 +80,23 @@ class ManimTransition(VGroup):
     def create_reflexive_arrow(self, point1, point2) -> None:
         self.arrow = CurvedArrow(point2, point1, angle=1.5*PI)
         
+        #used to position the read symbols
         center_of_arc = self.arrow.get_arc_center()
         radius = self.arrow.radius
 
         #positions the text above the reflexive arrow
-        self.text.move_to(center_of_arc).shift(UP*radius*1.5)
+        for index, read_symbol in enumerate(self.read_symbols):
+            # positions symbols to be stacked on top of the reflexive arrow.
+            read_symbol.move_to(center_of_arc).shift(UP*radius+[0, index+1, 0])
 
     def calculate_direction_of_arrow_label(self, normal_vector_choice: int = 0) -> list[int]:
         """Calculates the which side of the arrow the label should be placed"""
-        # direction_of_arrow = [self.arrow.get_x(), self.arrow.get_y()]
-        # direction = self.arrow.line.get_normal_vector()
-        #difference of the arrow
-        x1 = None
-        y1 = None
-        if type(self.start_state) == list:
-            x1 = self.start_state[0]
-            y1 = self.start_state[1]
-        else:
-            x1 = self.start_state.get_x()
-            y1 = self.start_state.get_y()
 
-        x2 = self.end_state.get_x()
-        y2 = self.end_state.get_y()
+        x1 = self.transition_from.get_x()
+        y1 = self.transition_from.get_y()
+
+        x2 = self.transition_to.get_x()
+        y2 = self.transition_to.get_y()
 
         difference_of_x = x2 - x1
         difference_of_y = y2 - y1
@@ -133,15 +116,15 @@ class ManimTransition(VGroup):
         #Obtain coordinates for the centre of the line
         x1 = None
         y1 = None
-        if type(self.start_state) == list:
-            x1 = self.start_state[0]
-            y1 = self.start_state[1]
+        if type(self.transition_from) == list:
+            x1 = self.transition_from[0]
+            y1 = self.transition_from[1]
         else:
-            x1 = self.start_state.get_x()
-            y1 = self.start_state.get_y()
+            x1 = self.transition_from.get_x()
+            y1 = self.transition_from.get_y()
 
-        x2 = self.end_state.get_x()
-        y2 = self.end_state.get_y()
+        x2 = self.transition_to.get_x()
+        y2 = self.transition_to.get_y()
 
         #midpoint
         c1 = (x1 + x2) / 2
@@ -149,13 +132,17 @@ class ManimTransition(VGroup):
 
         # normal_offset = [x for x in self.calculate_direction_of_arrow_label()]
         normal_offset = self.calculate_direction_of_arrow_label()
+        for index, read_symbol in enumerate(self.read_symbols):
+            buffer = 0.1 #buffer between line and start of read symbols
 
-        for index, manim_read_symbol in enumerate(self.manim_read_symbols):
-            buffer = 0.1 #buffer between read_symbols
-            normal_offset[1] = normal_offset[1] * (index+1 + buffer)
+            #if there are multiple symbols then stack them
+            read_symbol_offset_y = normal_offset[1] * (index+1 + buffer)
+            #directional offset from the arrow line
+            read_symbol_offset = [normal_offset[0], read_symbol_offset_y]
+            
+            #apply offset to centre of line coordinates
+            text_coordinates = [x + y for x, y in zip([c1, c2, 0], read_symbol_offset)]
 
-            text_coordinates = [x + y for x, y in zip([c1, c2, 0], normal_offset)]
-
-            manim_read_symbol.set_x(text_coordinates[0])
-            manim_read_symbol.set_y(text_coordinates[1])
-        
+            #apply offset coordinates to the mobject.
+            read_symbol.set_x(text_coordinates[0])
+            read_symbol.set_y(text_coordinates[1])
