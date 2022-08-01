@@ -1,9 +1,12 @@
+MANIM AUTOMATA
+==============
+A Manim plugin that allows you to generate scenes with Finite State Machines and their inputs. The plugin will automatically generate these animations with minimal setup from the user.
+
+This plugin has been funded by the University of Leeds.
 
 YOUTUBE VIDEO EXAMPLE
 =====================
 [![Finite State Machine in Manim](https://img.youtube.com/vi/Lfq6XD3-aUw/0.jpg)](https://www.youtube.com/watch?v=Lfq6XD3-aUw)
-
-
 
 Notes
 =====
@@ -34,7 +37,6 @@ Once manim-automata has been imported, you can use the ManimAutomata class to cr
 
 How To Use
 ==========
-
 
 
 
