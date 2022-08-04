@@ -57,3 +57,8 @@ class ManimAutomataInput(VGroup):
         color = animation_style["token_highlight"]["color"]
 
         return animation_function(token, color=color)
+
+
+
+
+    
