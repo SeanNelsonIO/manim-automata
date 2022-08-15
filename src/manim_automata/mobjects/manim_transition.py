@@ -64,10 +64,8 @@ class ManimTransition(Transition, VGroup):
             self.position_text() #- this is causing errors
 
         
-        if self.circle is not None:
-            VGroup.__init__(self, self.arrow, *self.read_symbols, self.circle, self.square, **kwargs)
-        else:
-            VGroup.__init__(self, self.arrow, *self.read_symbols, **kwargs)
+      
+        VGroup.__init__(self, self.arrow, *self.read_symbols, **kwargs)
 
        
 
@@ -131,7 +129,7 @@ class ManimTransition(Transition, VGroup):
         
         return normal_vectors[normal_vector_choice]
 
-    def position_text(self, buffer=1) -> None:
+    def position_text(self, buffer=0.5) -> None:
         """This function positions text next to the arrow as there was no good way to do it with the lib rary"""
         #Obtain coordinates for the centre of the line
         x1 = None
@@ -153,15 +151,10 @@ class ManimTransition(Transition, VGroup):
         # normal_offset = [x for x in self.calculate_direction_of_arrow_label()]
         normal_offset = self.calculate_direction_of_arrow_label()
         for index, read_symbol in enumerate(self.read_symbols):
-   
-            if index == 0: #buffer between line and start of read symbols
-                first_normal_offset = [x * buffer for x in normal_offset]
-
-                # normal_offset = normal_offset * buffer
-
             #if there are multiple symbols then stack them
             read_symbol_offset_y = normal_offset[1] * (index+1 * buffer)
-            read_symbol_offset_x = normal_offset[0] * buffer
+            read_symbol_offset_x = normal_offset[0] * (index+1 * buffer)
+            # read_symbol_offset_x = normal_offset[0] * buffer
             #directional offset from the arrow line
             read_symbol_offset = [read_symbol_offset_x, read_symbol_offset_y]
             
@@ -193,7 +186,7 @@ class ManimTransition(Transition, VGroup):
 
         self.add(self.arrow, *self.read_symbols)
 
-    def construct_curved_arrow(self, buffer=1):
+    def construct_curved_arrow(self, buffer=0.5):
         #create a straight line and use the points locations to create curved arrow
         temp_arrow = Arrow(self.transition_from, self.transition_to)
         from_point = temp_arrow.start
@@ -217,15 +210,11 @@ class ManimTransition(Transition, VGroup):
         normal_offset = self.calculate_direction_of_arrow_label()
         
         for index, read_symbol in enumerate(self.read_symbols):
-   
-            if index == 0: #buffer between line and start of read symbols
-                first_normal_offset = [x * buffer for x in normal_offset]
-
-                # normal_offset = normal_offset * buffer
-
             #if there are multiple symbols then stack them
             read_symbol_offset_y = normal_offset[1] * (index+1 * buffer)
-            read_symbol_offset_x = normal_offset[0] * buffer
+            
+            # read_symbol_offset_x = normal_offset[0] * buffer
+            read_symbol_offset_x = normal_offset[0] * (index+1 * buffer)
             #directional offset from the arrow line
             read_symbol_offset = [read_symbol_offset_x, read_symbol_offset_y]
             
