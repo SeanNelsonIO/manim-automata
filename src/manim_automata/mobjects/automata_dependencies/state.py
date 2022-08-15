@@ -33,16 +33,23 @@ class State:
         self.final = final
 
         #list of transitions links this state to others
-        self.links = []
+        self.transitions = []
 
-    def add_transition_to_state(self, transition: "Transition") -> None:
-        self.links.append(transition)
+    def add_transition_to_state(self, transition: "Transition") -> list:
+        self.transitions.append(transition)
+        return self.transitions
 
-    def get_transitions(self) -> list["Transition"]:
-        return self.links
+    def get_transition(self, id: int) -> "Transition":
+        for transition in self.transitions: 
+            if transition.id == id:
+                return transition
+        return None
 
-    def get_transition(self, index: int) -> "Transition": #DEPRECATED
-        return self.links[index]
+    def get_transition_by_transition_to_state_id(self, transition_to_state_id):
+        for transition in self.transitions:
+            if transition.transition_to.id == transition_to_state_id:
+                return transition
+        return None
 
     def __str__(self) -> str:
         return 'State id: {self.id}, name: {self.name}'.format(self=self)

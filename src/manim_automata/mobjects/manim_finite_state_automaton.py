@@ -138,7 +138,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup):
             self.construct_transition(transition_from, transition_to, read_values)
 
     def construct_transition(self, transition_from: ManimState, transition_to: ManimState, read_symbols: list):
-        new_transition = ManimTransition(transition_from, transition_to, read_symbols, animation_style=self.animation_style)
+        new_transition = ManimTransition(transition_from, transition_to, read_symbols, parent_automaton=self, animation_style=self.animation_style)
         self.transitions.append(new_transition)
         #add the transition to the from_states link list
         transition_from.add_transition_to_state(new_transition)

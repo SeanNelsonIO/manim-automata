@@ -1,5 +1,5 @@
 from manim import *
-from src.manim_automata.mobjects.manim_finite_state_automaton import ManimAutomaton, ManimState
+from src.manim_automata.mobjects.manim_finite_state_automaton import ManimAutomaton
 # from manim_automata import *
 
 
@@ -81,10 +81,15 @@ class Test(MovingCameraScene):
             FadeIn(automaton_input)
         )
 
-         # Play all the animations generate from .play_string()
-        for sequence in manim_automaton.play_string(automaton_input):
-            for step in sequence:
-                self.play(step, run_time=1)
+        #  # Play all the animations generate from .play_string()
+        # for sequence in manim_automaton.play_string(automaton_input):
+        #     for step in sequence:
+        #         self.play(step, run_time=1)
+
+
+
+
+
 
         # self.play(self.camera.frame.animate.move_to(manim_automaton.get_initial_state().circle))
         
