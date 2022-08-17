@@ -172,10 +172,8 @@ class ManimTransition(Transition, VGroup):
         This method is primarily used when there are two opposing transitions
         between two states.
         """
-
         #remove existing manim arrow
         self.remove(self.arrow) 
-
 
         #remove manim read symbols
         for read_symbol in self.read_symbols:
@@ -183,7 +181,6 @@ class ManimTransition(Transition, VGroup):
 
         #create new curved arrow and read symbols
         self.construct_curved_arrow()
-
         self.add(self.arrow, *self.read_symbols)
 
     def construct_curved_arrow(self, buffer=0.5):

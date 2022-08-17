@@ -1,3 +1,3 @@
-from .manim_finite_state_automaton import *
+from .manim_automaton import *
 
 __all__ = ["ManimAutomaton"]
