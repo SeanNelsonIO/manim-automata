@@ -4,6 +4,8 @@ from .manim_state import ManimState, State
 from .manim_automaton_input import ManimAutomataInput
 from .manim_transition import ManimTransition
 
+from .manim_cli import ManimAutomataCLI
+
 from typing import Union
 
 import abc
@@ -54,12 +56,15 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         pass
     """
 
-    def __init__(self, json_template=None, xml_file=None, camera_follow=False, animation_style=default_animation_style, **kwargs) -> None:
+    def __init__(self, json_template=None, xml_file=None, camera_follow=False, animation_style=default_animation_style, cli=False, **kwargs) -> None:
         super(FiniteStateAutomaton, self).__init__()
 
         self.animation_style = animation_style
         self.camera_follow = camera_follow
-        
+
+        self.cli = None
+        if cli:
+            self.cli = ManimAutomataCLI()
         # default animation style
         # and allow users to pass in functions that replace some of the functionality such as play_accept..
         
@@ -168,6 +173,17 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         self.manim_automata_input.set_x(c1)
         self.manim_automata_input.set_y(c2 + self.height/4)
         
+    def check_automaton_result(self, state_pointers):
+        for state in state_pointers:
+            if state.final == True:
+                return True
+        return False
+
+
+
+
+
+
 
     # def parse_animation_style(self):
         # pass

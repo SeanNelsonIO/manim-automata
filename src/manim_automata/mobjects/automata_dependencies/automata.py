@@ -91,7 +91,7 @@ class FiniteStateAutomaton():
         if len(next_states) != 0:
             return True, next_states, transition_ids #the token matches the transition's input
 
-        return False, next_states, None #There are no other transitions/ reachable next states given the token
+        return False, next_states, transition_ids #There are no other transitions/ reachable next states given the token
 
 
 
