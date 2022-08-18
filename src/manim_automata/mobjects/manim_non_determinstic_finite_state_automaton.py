@@ -7,6 +7,8 @@ from .manim_transition import ManimTransition
 
 from typing import Union
 
+import json
+
 
 class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
 
@@ -158,7 +160,6 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
 
 
     def generate_next_state_options(self, state_pointer, transition_ids):
-
         options = {}
         for index, transition_id in enumerate(transition_ids):
             transition = self.get_transition_by_id(int(transition_id))
@@ -168,4 +169,13 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         return options
 
     def export_recorded_path_to_file(self):
-        pass
+        with open("recorded_path.txt", "w") as fp:
+            json.dump(self.recorded_path, fp)
+
+    def import_recorded_path_from_file(self, file_name):
+        with open(f"{file_name}", "r") as fp:
+            path_list = json.load(fp)
+            #check that the type is a list
+            if type(path_list) is list:
+                return path_list
+        return None
