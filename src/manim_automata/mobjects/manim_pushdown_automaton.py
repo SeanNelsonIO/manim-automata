@@ -1,7 +1,7 @@
 
 from manim import *
 
-from .manim_automaton import ManimAutomaton
+
 
 
 # class ManimPushDownAutomaton(FiniteStateAutomaton, VGroup):

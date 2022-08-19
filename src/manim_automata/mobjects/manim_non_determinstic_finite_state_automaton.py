@@ -1,3 +1,4 @@
+
 from manim import *
 
 from .manim_automaton import ManimAutomaton
