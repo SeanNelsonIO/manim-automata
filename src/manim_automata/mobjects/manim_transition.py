@@ -1,7 +1,6 @@
 from cmath import cos
 from curses import tparm
 from manim import *
-from manim_automata import ManimAutomaton
 from .automata_dependencies.automata import Transition
 
 from .manim_state import ManimState
@@ -28,7 +27,7 @@ class ManimTransition(Transition, VGroup):
         transition_from: ManimState,
         transition_to: ManimState,
         read_symbols: list,
-        parent_automaton: ManimAutomaton,
+        parent_automaton: "ManimAutomaton",
         animation_style: dict,
         font_size = 100,
         **kwargs
