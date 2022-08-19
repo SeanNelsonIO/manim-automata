@@ -1,4 +1,4 @@
-# __version__ = "0.1.3"
+__version__ = "0.2.11"
 
 from .mobjects.manim_automaton import *
 from .mobjects.manim_determinstic_finite_state_automaton import *
