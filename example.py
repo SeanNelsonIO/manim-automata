@@ -1,7 +1,9 @@
 from manim import *
 # from src.manim_automata.mobjects.manim_determinstic_finite_state_automaton import ManimDeterminsticFiniteAutomaton
 # from src.manim_automata.mobjects.manim_non_determinstic_finite_state_automaton import ManimNonDeterminsticFiniteAutomaton
-from manim_automata import *
+# from manim_automata import *
+
+from manim_automata import ManimNonDeterminsticFiniteAutomaton
 
 class Automaton(MovingCameraScene):
     def construct(self):
