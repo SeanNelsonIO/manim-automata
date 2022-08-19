@@ -1,4 +1,3 @@
-from re import L
 from manim import *
 
 from .manim_automaton import ManimAutomaton
@@ -9,7 +8,6 @@ from .manim_transition import ManimTransition
 from typing import Union
 
 import json
-
 
 class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
 
@@ -212,9 +210,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         if initial_state.name != automaton_path[0][0]: #check that the start of the path matches the initial state
             pass #display erro
 
-
         state_pointer = initial_state # Keeps track of all the states that are activated
-
 
         for token, path_transition in zip(self.manim_automata_input.tokens, automaton_path):
             current_state = state_pointer
@@ -241,8 +237,6 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
 
         return list_of_animations
    
-
-
 
     #Improving play string method
     def play_predetermined_sequence(self, token, state_pointer, list_of_animations, predetermined_transition: "ManimTransition" = None) -> list[State]:
