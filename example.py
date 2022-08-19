@@ -62,7 +62,12 @@ class Test(MovingCameraScene):
         # manim_automaton = ManimAutomaton()
         
         # self.play(FadeIn(manim_automaton))
-        manim_automaton = ManimNonDeterminsticFiniteAutomaton(xml_file='example_machine.jff', cli=True)
+        # manim_automaton = ManimNonDeterminsticFiniteAutomaton(xml_file='example_machine.jff', cli=True)
+        manim_automaton = ManimNonDeterminsticFiniteAutomaton(xml_file='example_machine.jff')
+
+
+
+        
 
 
         #Adjust camera frame to fit ManimAutomaton in scene
@@ -84,7 +89,7 @@ class Test(MovingCameraScene):
         )
 
         #  # Play all the animations generate from .play_string()
-        for sequence in manim_automaton.play_string(automaton_input):
+        for sequence in manim_automaton.play_string(automaton_input, automaton_path_name="recorded_path.txt"):
             
             for step in sequence:
                 self.play(step, run_time=0.5)

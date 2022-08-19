@@ -222,3 +222,10 @@ class ManimTransition(Transition, VGroup):
             read_symbol.set_x(text_coordinates[0])
             read_symbol.set_y(text_coordinates[1])
 
+    def check_transition_read_symbols(self, token):
+        """Given a token, check there is a read_symbol that matches"""
+        for read_symbol in self.read_symbols:
+            if read_symbol.tex_string == token.tex_string:
+                return True # There is a read_symbol that matches the given token
+        return False #There are no read_symbols that match the given token
+
