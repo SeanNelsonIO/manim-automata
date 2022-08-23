@@ -21,7 +21,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
             super().__init__(json_template, xml_file, camera_follow, animation_style, cli=cli, **kwargs)
 
         
-        if cli is True: #if cli exist display options to user
+        if cli: #if cli exist display options to user
             self.cli.display_nda_options()
             if self.cli.nda_option == 0: #check the settings of the cli (what the user wants to do)
                 self.nda_builder = True

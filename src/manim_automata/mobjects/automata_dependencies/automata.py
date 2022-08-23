@@ -55,7 +55,7 @@ class FiniteStateAutomaton():
         
         self.construct_states(states)
         self.construct_transitions(transitions)
-        
+    
 
     #State Methods
     def get_initial_state(self) -> State:
@@ -102,3 +102,29 @@ class FiniteStateAutomaton():
         for transition in self.transitions:
             if transition.id == id:
                 return transition
+
+
+
+class PushDownAutomaton(FiniteStateAutomaton):
+    def __init__(self):
+        super().__init__()
+
+    def automaton_step(self, token: str, state_pointer: State, determinstic: bool = True) -> tuple:
+        next_states = [] #stores all of the next states that can be jumped to
+        transition_ids = [] #store the ids of the transitions that transition from current to next states.
+        
+        #go through each transition of this state
+        state_transitions = state_pointer.get_transitions()
+        for transition in state_transitions:
+            #check if any transition's symbols match the input token
+            for read_symbol in transition.read_symbols: #Iterate through the transtion's read options
+                if read_symbol.tex_string == token.tex_string:
+                    next_states.append(transition.transition_to)
+                    transition_ids.append(transition.id)
+                    if determinstic: #pick the first valid transition and next state then returns.
+                        return True, next_states, transition_ids #the token matches the transition's input
+
+        if len(next_states) != 0:
+            return True, next_states, transition_ids #the token matches the transition's input
+
+        return False, next_states, transition_ids #There are no other transitions/ reachable next states given the token

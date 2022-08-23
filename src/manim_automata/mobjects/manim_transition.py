@@ -30,6 +30,7 @@ class ManimTransition(Transition, VGroup):
         parent_automaton: "ManimAutomaton",
         animation_style: dict,
         font_size = 100,
+        buffer: int = 1,
         **kwargs
     ) -> None:
 
@@ -39,12 +40,14 @@ class ManimTransition(Transition, VGroup):
         self.animation_style = animation_style
         #store tex mobjects of read_symbols for transitions
         self.read_symbols = []
+        
+        self.buffer = buffer
 
         self.parent_automaton = parent_automaton
         #create manim read symbols for transitition
         for read_symbol in read_symbols:
             #Create mobjects of read_symbol
-            self.read_symbols.append(Tex(read_symbol, font_size=font_size))
+            self.read_symbols.append(MathTex(read_symbol, font_size=font_size))
         
         if self.transition_from == self.transition_to: #create transition that points to itself
             position_1, position_2 = self.calculate_circle_vertices()
@@ -60,9 +63,10 @@ class ManimTransition(Transition, VGroup):
 
         else: #transition_from ----> transition_to
             self.arrow = Arrow(transition_from, transition_to, buff=0)
-            self.position_text() #- this is causing errors
+            self.position_text(self.buffer) #- this is causing errors
 
         
+        self.rotate_symbols_parallel_to_arrow()
       
         VGroup.__init__(self, self.arrow, *self.read_symbols, **kwargs)
 
@@ -128,7 +132,7 @@ class ManimTransition(Transition, VGroup):
         
         return normal_vectors[normal_vector_choice]
 
-    def position_text(self, buffer=0.5) -> None:
+    def position_text(self, buffer) -> None:
         """This function positions text next to the arrow as there was no good way to do it with the lib rary"""
         #Obtain coordinates for the centre of the line
         x1 = None
@@ -221,10 +225,77 @@ class ManimTransition(Transition, VGroup):
             read_symbol.set_x(text_coordinates[0])
             read_symbol.set_y(text_coordinates[1])
 
+
     def check_transition_read_symbols(self, token):
         """Given a token, check there is a read_symbol that matches"""
         for read_symbol in self.read_symbols:
             if read_symbol.tex_string == token.tex_string:
                 return True # There is a read_symbol that matches the given token
         return False #There are no read_symbols that match the given token
+
+
+    def rotate_symbols_parallel_to_arrow(self):
+        for read_symbol in self.read_symbols:
+            slope = self.calculate_slope_of_line()
+    
+            angle_between_slope_and_x_axis = math.atan(slope)
+            # print(angle_between_slope_and_x_axis)
+            read_symbol.rotate(angle_between_slope_and_x_axis)
+
+    def calculate_slope_of_line(self):
+        start_point = self.arrow.get_start()
+        end_point = self.arrow.get_end()
+        x1 = start_point[0]
+        x2 = end_point[0]
+        y1 = start_point[1]
+        y2 = end_point[1]
+
+        if x1 == x2 and y2 == y1: # reflexive arrow is parallel to x axis
+            return 0
+
+        return (y2-y1)/(x2-x1)
+
+class ManimPushDownAutomatonTransition(ManimTransition):
+
+    def __init__(
+        self,
+        transition_from: ManimState,
+        transition_to: ManimState,
+        rules: list,
+        animation_style: dict,
+        font_size = 100,
+        **kwargs
+    ) -> None:
+
+        Transition.__init__(self, transition_from, transition_to)
+        self.circle = None
+        #manim settings for animations and colors
+        self.animation_style = animation_style
+        #store tex mobjects of read_symbols for transitions
+        self.read_symbols = []
+        #list of PushDownAutomatonRule
+        self.rules = rules
+
+        #create manim read symbols for transitition
+        for rule in rules:
+            #Create mobjects of read_symbol
+            self.read_symbols.append(MathTex(rule.__str__, font_size=font_size))
+        
+        if self.transition_from == self.transition_to: #create transition that points to itself
+            position_1, position_2 = self.calculate_circle_vertices()
+            self.create_reflexive_arrow(position_1, position_2)
+        elif self.transition_to.get_transition_by_transition_to_state_id(self.transition_from.id) is not None: #check if there already exists an arrow pointing the opposite way
+            #pre-exising arrow transition converted to curved arrow
+            opposite_transition = self.transition_to.get_transition_by_transition_to_state_id(self.transition_from.id)
+            opposite_transition.convert_straight_arrow_to_curved_arrow()
+
+            #create this(self) arrow
+            self.construct_curved_arrow()
+
+        else: #transition_from ----> transition_to
+            self.arrow = Arrow(transition_from, transition_to, buff=0)
+            self.position_text() #- this is causing errors
+
+      
+        VGroup.__init__(self, self.arrow, *self.read_symbols, **kwargs)
 
