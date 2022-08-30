@@ -1,44 +1,21 @@
 
 from manim import *
 
-from .manim_determinstic_finite_state_automaton import ManimDeterminsticFiniteAutomaton
+from .manim_non_determinstic_finite_state_automaton import ManimNonDeterminsticFiniteAutomaton
 from .manim_state import ManimState, State
 from .manim_automaton_input import ManimAutomataInput
 from .manim_transition import ManimTransition
 
-# class ManimPushDownAutomaton(FiniteStateAutomaton, VGroup):
+from typing import Union
 
-#     def __init__(self, json_template=None, xml_file=None, camera_follow=False, animation_style=default_animation_style, **kwargs) -> None:
-#         super(FiniteStateAutomaton, self).__init__()
-
-#         self.animation_style = animation_style
-#         self.camera_follow = camera_follow
-        
-#         # default animation style
-#         # and allow users to pass in functions that replace some of the functionality such as play_accept..
-        
-#         super(VGroup, self).__init__(**kwargs)
-
-#         if json_template:
-#             self.automaton = FiniteStateAutomaton(json_template==json_template)
-#             self.construct_manim_states()
-#             self.construct_manim_transitions()
-#         elif xml_file:
-#             self.process_xml(xml_file)
-
-
-#         #add manim_states to screen/renderer
-#         self.add(*self.states)
-#         self.add(*self.transitions)
-
-class ManimPushDownAutomaton(ManimDeterminsticFiniteAutomaton):
+class ManimPushDownAutomaton(ManimNonDeterminsticFiniteAutomaton):
 
     stack: list
 
-    def __init__(self, json_template=None, xml_file=None, camera_follow=False, animation_style=None, **kwargs) -> None:
+    def __init__(self, json_template=None, xml_file=None, camera_follow=False, animation_style=None,  **kwargs) -> None:
         super().__init__(json_template, xml_file, camera_follow, animation_style, **kwargs)
-        #initialise stack
-        self.stack = []
+        #initialise stack - Z is the bottom stack symbol
+        self.stack = ["Z"]
 
     #override ManimAutomaton method
     def construct_transitions(self, transitions):
@@ -85,6 +62,11 @@ class ManimPushDownAutomaton(ManimDeterminsticFiniteAutomaton):
     def pop(self):
         return self.stack.pop()
 
+    #returns a list of animations to run through
+    #override
+    def play_string(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None, accept_on_final_state: bool = True) -> list:
+        return super().play_string(input, automaton_path_name, stack=self.stack, accept_on_final_state=self.accept_on_final_state)
+
 
 
 class PushDownAutomatonRule():
@@ -93,9 +75,9 @@ class PushDownAutomatonRule():
     pop: str
     push: list[str]
 
-    def __init__(self, read_symbol: str, pop: str, push: str) -> None:
+    def __init__(self, read_symbol: str, pop: str, push: str, empty_transition: str = r"\epsilon") -> None:
         if read_symbol is None:
-            self.read_symbol = r"\lambda"
+            self.read_symbol = empty_transition
         else:
             self.read_symbol = read_symbol
 
@@ -103,7 +85,7 @@ class PushDownAutomatonRule():
         self.push = []
 
         if push is None:
-            self.push = r"\lambda"
+            self.push = empty_transition
         else:
             for push_item in push:
                 self.push.append(push_item)

@@ -179,6 +179,18 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
                 return True
         return False
 
+    def determine_input(self, input):
+        """Checks to if input is a string or already an manim mobject,
+            if it is type string then create manim_input instance using
+            the input string.
+        """
+        if type(input) is str:
+            #create mobject of input string
+            self.manim_automata_input = self.construct_automaton_input(input)
+            #position the mobject
+            self.set_default_position_of_input_string()
+        else: return input #if input is already an instance of ManimAutomataInput
+
 
 
 

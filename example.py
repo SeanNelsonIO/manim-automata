@@ -3,13 +3,17 @@ from manim import *
 # from src.manim_automata.mobjects.manim_non_determinstic_finite_state_automaton import ManimNonDeterminsticFiniteAutomaton
 # from manim_automata import *
 
+
+
 from src.manim_automata.mobjects.manim_pushdown_automaton import ManimPushDownAutomaton
 
+from src.manim_automata.mobjects.manim_non_determinstic_finite_state_automaton import ManimNonDeterminsticFiniteAutomaton
+from src.manim_automata.mobjects.manim_determinstic_finite_state_automaton import ManimDeterminsticFiniteAutomaton
 
 class Test(MovingCameraScene):
     def construct(self):
         
-        manim_automaton = ManimNonDeterminsticFiniteAutomaton(xml_file='example_machine.jff', cli=True)
+        manim_automaton = ManimNonDeterminsticFiniteAutomaton(xml_file='example_machine.jff', cli=False)
     
         #Adjust camera frame to fit ManimAutomaton in scene
         self.camera.frame_width = manim_automaton.width + 10
@@ -28,10 +32,17 @@ class Test(MovingCameraScene):
             FadeIn(automaton_input)
         )
 
+        # print(manim_automaton.play_string(automaton_input))
+
+
         # Play all the animations generate from .play_string()
         for sequence in manim_automaton.play_string(automaton_input):
+            # break
             for step in sequence:
                 self.play(step, run_time=0.5)
+                print(step, len(self.get_mobject_family_members()))
+        
+                    
 
 
 

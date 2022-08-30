@@ -20,7 +20,7 @@ class ManimDeterminsticFiniteAutomaton(ManimAutomaton):
     def play_string(self, input: Union[str, "ManimAutomataInput"]) -> list:
         if type(input) is str:
             #create mobject of input string
-            self.manim_automata_input = self.construct_automaton_input(input_string)
+            self.manim_automata_input = self.construct_automaton_input(input)
             #position the mobject
             self.set_default_position_of_input_string()
             #display manim_automaton_input to the screen
@@ -40,9 +40,9 @@ class ManimDeterminsticFiniteAutomaton(ManimAutomaton):
                 #animate for the final state
                 pass
     
-            step_result, next_states, transition_ids = self.automaton_step(token, state_pointer) #simulates the machine
+            step_result, next_states, transitions = self.automaton_step(token, state_pointer) #simulates the machine
 
-            transition = self.get_transition_by_id(int(transition_ids[0]))
+            transition = transitions[0]
 
             list_of_animations.append(self.step(transition, token, state_pointer, step_result)) # self.step returns a list of animations for that step
 

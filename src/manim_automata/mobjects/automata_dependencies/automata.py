@@ -73,9 +73,9 @@ class FiniteStateAutomaton():
             if state.id == id:
                 return state
 
-    def automaton_step(self, token: str, state_pointer: State, determinstic: bool = True) -> tuple:
+    def automaton_step(self, token: str, state_pointer: State) -> tuple:
         next_states = [] #stores all of the next states that can be jumped to
-        transition_ids = [] #store the ids of the transitions that transition from current to next states.
+        transitions = [] #store the transitions that transition from current to next states.
         
         #go through each transition of this state
         state_transitions = state_pointer.get_transitions()
@@ -84,16 +84,18 @@ class FiniteStateAutomaton():
             for read_symbol in transition.read_symbols: #Iterate through the transtion's read options
                 if read_symbol.tex_string == token.tex_string:
                     next_states.append(transition.transition_to)
-                    transition_ids.append(transition.id)
-                    if determinstic: #pick the first valid transition and next state then returns.
-                        return True, next_states, transition_ids #the token matches the transition's input
+                    transitions.append(transition)
+
 
         if len(next_states) != 0:
-            return True, next_states, transition_ids #the token matches the transition's input
+            return True, next_states, transitions #the token matches the transition's input
 
-        return False, next_states, transition_ids #There are no other transitions/ reachable next states given the token
+        return False, next_states, transitions #There are no other transitions/ reachable next states given the token
 
-
+    #IMPORTANT
+    #if there is an epsilon transition then take it regardless of the input
+    #needs to be added
+    #also possibly redesign the play_string method.
 
 
 
