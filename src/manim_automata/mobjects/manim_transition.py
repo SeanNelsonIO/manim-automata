@@ -63,6 +63,7 @@ class ManimTransition(Transition, VGroup):
 
         else: #transition_from ----> transition_to
             self.arrow = Arrow(transition_from, transition_to, buff=0)
+            # self.arrow.scale(2, scale_tips=True, **kwargs)
             self.position_text(self.buffer) #- this is causing errors
 
         
@@ -86,6 +87,11 @@ class ManimTransition(Transition, VGroup):
             
 
         return animation_function(self.arrow.copy().set_color(color), run_time=run_time, time_width=time_width)
+
+    def animate__transition(self, transition_result: bool):
+        animation_function = self.animation_style["animate_transition"]["animation_function"]
+
+        return animation_function(self.arrow)
 
 
     def calculate_circle_vertices(self) -> tuple[int]:

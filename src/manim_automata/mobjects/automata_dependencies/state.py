@@ -26,8 +26,11 @@ class State:
 
     id_iter = itertools.count()
 
-    def __init__(self, name: str, initial: bool = None, final: bool = None) ->  None:
-        self.id = next(self.id_iter)
+    def __init__(self, name: str, initial: bool = None, final: bool = None,  id = None) ->  None:
+        if int(id) is not None:
+            self.id = int(id)
+        else: self.id = next(self.id_iter)
+        
         self.name = name
         self.initial = initial
         self.final = final

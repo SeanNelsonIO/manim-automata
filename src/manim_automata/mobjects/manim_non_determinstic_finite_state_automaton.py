@@ -36,7 +36,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
 
         if type(input) is str:
             #create mobject of input string
-            self.manim_automata_input = self.construct_automaton_input(input_string)
+            self.manim_automata_input = self.construct_automaton_input(input)
             #position the mobject
             self.set_default_position_of_input_string()
             #display manim_automaton_input to the screen
@@ -48,7 +48,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         #Points to the current state
         state_pointer = self.get_initial_state()
         #Highlight current state with yellow
-        list_of_animations.append([FadeToColor(state_pointer, color=YELLOW)])
+        # list_of_animations.append([FadeToColor(state_pointer, color=YELLOW)])
 
         return list_of_animations
 
@@ -105,7 +105,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         text.set_y(self.manim_automata_input.get_y())
 
         list_of_accept_animations.append(Transform(self.manim_automata_input, text))
-        list_of_accept_animations.append(FadeToColor(self, color=GREEN))
+        # list_of_accept_animations.append(FadeToColor(self, color=GREEN))
 
         return list_of_accept_animations
 
@@ -117,7 +117,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         text.set_y(self.manim_automata_input.get_y())
 
         list_of_reject_animations.append(Transform(self.manim_automata_input, text))
-        list_of_reject_animations.append(FadeToColor(self, color=RED))
+        # list_of_reject_animations.append(FadeToColor(self, color=RED))
 
         return list_of_reject_animations
 
@@ -142,7 +142,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
                         #check the transition has a read symbol that matches the input token
                         if transition.check_transition_read_symbols(token):
                             #generate animations
-                            list_of_animations.append([FadeToColor(token, color=YELLOW)]) #highlights the current token
+                            # list_of_animations.append([FadeToColor(token, color=YELLOW)]) #highlights the current token
                             state_pointer = self.play_predetermined_sequence(token, state_pointer, list_of_animations, predetermined_transition=transition)
                             list_of_animations.append([token.animate.set_opacity(0.5)]) #animates that the token has been used
                             break
@@ -175,7 +175,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
 
 
     #parent function that plays are the branches in "parallel"
-    def play__refactor_string(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None) -> list:
+    def play__string(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None) -> list:
         """
         parameters:
             automaton_path: provides a single path used to navigate through the nda, 
@@ -193,20 +193,31 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         self.list_of_animations = self.initialisation_animation(input)
 
         initial_state = self.get_initial_state()
-        
+        list_of_animations = []
         initial_branch = Branch(initial_state)
 
         self.all_branches = [initial_branch] #stores all the branches produced by non-determinism
         #need a branch to start with
         
         current_branches = self.all_branches
+        import gc
+        print("gc: ", len(gc.get_objects(generation=None)))
         # Animate the automaton going through the sequence
         for i, token in enumerate(self.manim_automata_input.tokens):
+            self.count_id = 0
             self.list_of_animations.append([FadeToColor(token, color=YELLOW)]) #highlights the current token
 
-            current_branches = self.play_branches(token, current_branches)
+            current_branches = self.play_branches(token, current_branches, list_of_animations)
             
             self.list_of_animations.append([token.animate.set_opacity(0.5)]) #animates that the token has been used
+        
+
+        print("gc: ", len(gc.get_objects(generation=None)))
+        print("Branch: ", self.count_id, len(self.all_branches))
+        self.all_branches = []
+        print("gc: ", len(gc.get_objects(generation=None)))
+        
+
         
         #once the tokens have ended, check to see if there are any alive branches
         #that end on a final state, if the nda accepts.
@@ -227,7 +238,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         if self.nda_builder:
             self.export_recorded_path_to_file()
 
-        return self.list_of_animations
+        return list_of_animations
 
     def pick_transition(self, state_pointer, transitions):
         path_options = self.generate_next_state_options(state_pointer, transitions)
@@ -236,29 +247,39 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
 
         return [transition.transition_to], [transition]
 
-    def play_branches(self, token, current_branches) -> list["Branch"]:
+    def play_branches(self, token, current_branches, list_of_animations) -> list["Branch"]:
         active_branches = []
         for branch in current_branches: #loop though each branch and run one step
+            if branch.id > self.count_id:
+                self.count_id = branch.id
+            
             state_pointer = branch.state_pointer
-
             result, next_states, transitions = self.automaton_step(token, state_pointer)
 
             if self.nda_builder: #if nda_builder, only choose one path
                 next_states, transitions = self.pick_transition(state_pointer, transitions)
            
             # self.generate_animation_sequence(result, next_states, transitions, list_of_animations)
-            self.play_sequence(token, result, state_pointer, next_states, transitions)
+            self.play__sequence(token, result, state_pointer, next_states, transitions, list_of_animations)
 
             if result is False: #branch wasn't able to transition given a token, therefore language is rejected for branch.
                 branch.reject()
+                # self.all_branches.remove(branch)
         
-            new_branches = branch.step_through(transitions) #assign new state_pointer to current branch and create divergent branches(if any)
-            active_branches = active_branches + new_branches # add any new branches to active branches
-            self.all_branches = self.all_branches + new_branches
+            # new_branches = branch.step_through(transitions) #assign new state_pointer to current branch and create divergent branches(if any)
+            # active_branches = active_branches + new_branches # add any new branches to active branches
+            # self.all_branches = self.all_branches + new_branches
 
+            active_branches = [branch]
+
+            if result is False:
+                del branch
+
+            
+            
         return active_branches
 
-    def play_refactor_sequence(self, token, result, state_pointer, next_states, transitions):
+    def play__sequence(self, token, result, state_pointer, next_states, transitions, list_of_animations):
         #if step result is False then there are no more steps, check for final state and highlight state pointer as finished.
         for transition in transitions:
             self.list_of_animations.append(self.step(transition, token, state_pointer, result)) #self.step returns a list of animations for that step
@@ -267,20 +288,20 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         if result is True:
             if len(next_states) > 0:
                 #Broken TODO
-                self.list_of_animations.append([state_pointer.animate.set_color(color=BLUE)])
+                # return
+                list_of_animations.append([FadeToColor(state_pointer, color=BLUE)])
+                # self.list_of_animations.append([state_pointer.animate.set_color(color=BLUE)])
                 # print([FadeToColor(state_pointer, color=BLUE)])
                 # self.list_of_animations.append([FadeToColor(next_states[0], color=YELLOW)]) 
-                # self.list_of_animations.append([FadeToColor(x, color=YELLOW) for x in next_states])
+                list_of_animations.append([FadeToColor(x, color=YELLOW) for x in next_states])
 
     def play_sequence(self, token, state_pointers, list_of_animations, predetermined_transition: "ManimTransition" = None) -> list[State]:
         next_states = []
         for state_pointer in state_pointers: #look at each state and calculate the steps that state can take.
-
             step_result, next_neighbour_states, transitions = self.automaton_step(token, state_pointer) #simulates the machine
             
             if self.nda_builder:
                 path_options = self.generate_next_state_options(state_pointer, transition_ids)
-                print(f"Token: {token.tex_string}")
                 user_choice = self.cli.display_dictionary_options(path_options)
                 transition = path_options[user_choice][1] #get transition given user choice
                 
@@ -341,7 +362,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
                 #animate for the final state
                 pass
                 
-            list_of_animations.append([FadeToColor(token, color=YELLOW)]) #highlights the current token
+            # list_of_animations.append([FadeToColor(token, color=YELLOW)]) #highlights the current token
 
             state_pointers = self.play_sequence(token, state_pointers, list_of_animations) #generate the animations for this token sequence
 
@@ -372,7 +393,6 @@ class Branch():
         else: self.recorded_path = recorded_path #the branch was a passed history from parent Branch
 
         self.state_pointer = state_pointer #stores the state that the branch is currently on
-
     
     def step_through(self, transitions) -> list["Branch"]: #checks to see if branch diverges
         new_branches = [] #stores the new divergent branches

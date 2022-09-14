@@ -15,7 +15,7 @@ __all__ = ["ManimAutomaton"]
 default_animation_style = {
     "animate_transition": {
         "animation_function": ShowPassingFlash,
-        "accept_color": GREEN,
+        "accept_color": YELLOW,
         "reject_color": RED,
         "run_time": 0.5,
         "time_width": 2
@@ -57,7 +57,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
     """
 
     def __init__(self, json_template=None, xml_file=None, camera_follow=False, animation_style=default_animation_style, cli=False, **kwargs) -> None:
-        super(FiniteStateAutomaton, self).__init__()
+        FiniteStateAutomaton.__init__(self)
 
         self.animation_style = animation_style
         self.camera_follow = camera_follow
@@ -68,7 +68,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         # default animation style
         # and allow users to pass in functions that replace some of the functionality such as play_accept..
         
-        super(VGroup, self).__init__(**kwargs)
+        VGroup.__init__(self, **kwargs)
 
         if json_template:
             self.automaton = FiniteStateAutomaton(json_template==json_template)
@@ -105,7 +105,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         new_x = float(state["x"]) - self.origin_offset_x
         new_y = float(state["y"]) - self.origin_offset_y
         #check if final exist in state
-        self.states.append(ManimState(state["@name"], new_x, new_y, animation_style=self.animation_style, initial=initial, final=final))
+        self.states.append(ManimState(state["@name"], new_x, new_y, animation_style=self.animation_style, initial=initial, final=final, id=state["@id"]))
 
     def construct_states(self, states):
         #gets first initial state to calculate offset
@@ -140,7 +140,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
             read_values = transition_counter[state_key]
 
             transition_from = self.get_state_by_id(int(state_key[0]))
-            transition_to = self.get_state_by_id(int(state_key[1]))
+            transition_to = self.get_state_by_id(int(state_key[1])) #this is using the id from xml which will be different, can't use name either - has to be passed in
 
             self.construct_transition(transition_from, transition_to, read_values)
 

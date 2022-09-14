@@ -106,6 +106,8 @@ class ManimDeterminsticFiniteAutomaton(ManimAutomaton):
                 manim_transition.animate_transition(result)
             )
 
+
+
             list_of_step_animations.append(
                 token.animate.set_opacity(0.5)
             )

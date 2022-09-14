@@ -7,7 +7,8 @@
                 "request": "launch",
                 "module": "manim",
                 "args": ["${file}", "-pqh"],
-                "console": "integratedTerminal"
+                "console": "integratedTerminal",
+                "justMyCode": false
             },
         ]
     }

@@ -23,8 +23,8 @@ class ManimState(State, VGroup):
     text
         Text Mobject representation of the name from State instance.
     """
-    def __init__(self, name: str, x: float, y: float, animation_style: dict, initial: bool = None, final: bool = None, scaling=10, **kwargs) -> None:
-        State.__init__(self, name=name, initial=initial, final=final)
+    def __init__(self, name: str, x: float, y: float, animation_style: dict, initial: bool = None, final: bool = None, scaling=10, id=None, **kwargs) -> None:
+        State.__init__(self, name=name, initial=initial, final=final, id=id)
 
         #manim settings for animations and colors
         self.animation_style = animation_style

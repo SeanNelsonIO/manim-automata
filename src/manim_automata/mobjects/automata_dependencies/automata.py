@@ -5,7 +5,8 @@ from .xml_parser import parse_xml_file
 from .state import State
 from .transitition import Transition
 
-import gc #need a way of getting instances of class without gc TODO
+import itertools
+
         
 automaton_json = {
     'structure': {
@@ -37,11 +38,13 @@ automaton_json = {
 
 #this class manages states and transitions, including simulation
 class FiniteStateAutomaton():
-    states = []
-    transitions = []
-    
+
+    id_iter = itertools.count()
+
     def __init__(self):
-        pass
+        self.id = next(self.id_iter)
+        self.states = []
+        self.transitions = []
     
     def process_xml(self, xml_file: str) -> None:
         self.construct_from_json(parse_xml_file(xml_file))
