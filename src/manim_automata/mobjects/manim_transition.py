@@ -73,25 +73,27 @@ class ManimTransition(Transition, VGroup):
 
        
 
-    def animate_transition(self, transition_result: bool):
-        """Animates the arrow of a ManimTransition, color depends on if the transition
-        accepts the input token """
-        animation_function = self.animation_style["animate_transition"]["animation_function"]
-        run_time = self.animation_style["animate_transition"]["run_time"]
-        time_width = self.animation_style["animate_transition"]["time_width"]
+    # def animate__transition(self, transition_result: bool):
+    #     """Animates the arrow of a ManimTransition, color depends on if the transition
+    #     accepts the input token """
+    #     animation_function = self.animation_style["animate_transition"]["animation_function"]
+    #     run_time = self.animation_style["animate_transition"]["run_time"]
+    #     time_width = self.animation_style["animate_transition"]["time_width"]
 
-        if transition_result: 
-            color = self.animation_style["animate_transition"]["accept_color"]
-        else:
-            color = self.animation_style["animate_transition"]["reject_color"]
+    #     if transition_result: 
+    #         color = self.animation_style["animate_transition"]["accept_color"]
+    #     else:
+    #         color = self.animation_style["animate_transition"]["reject_color"]
             
 
-        return animation_function(self.arrow.copy().set_color(color), run_time=run_time, time_width=time_width)
+    #     return animation_function(self.arrow.copy().set_color(color), run_time=run_time, time_width=time_width)
 
-    def animate__transition(self, transition_result: bool):
+    def animate_transition(self, transition_result: bool):
         animation_function = self.animation_style["animate_transition"]["animation_function"]
 
-        return animation_function(self.arrow)
+        color = self.animation_style["animate_transition"]["accept_color"]
+        
+        return animation_function(self.arrow, color=color)
 
 
     def calculate_circle_vertices(self) -> tuple[int]:

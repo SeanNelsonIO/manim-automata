@@ -10,11 +10,13 @@ from typing import Union
 
 import abc
 
+import json
+
 __all__ = ["ManimAutomaton"]
 
 default_animation_style = {
     "animate_transition": {
-        "animation_function": ShowPassingFlash,
+        "animation_function": FadeToColor,
         "accept_color": YELLOW,
         "reject_color": RED,
         "run_time": 0.5,
@@ -24,7 +26,7 @@ default_animation_style = {
         "color": YELLOW
     },
     "token_highlight": {
-        "animation_function": Indicate,
+        "animation_function": FadeToColor,
         "color": YELLOW
     }
 }
@@ -65,6 +67,8 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         self.cli = None
         if cli:
             self.cli = ManimAutomataCLI()
+            self.nda_builder = True
+        else: self.nda_builder = False
         # default animation style
         # and allow users to pass in functions that replace some of the functionality such as play_accept..
         
@@ -192,7 +196,238 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         else: return input #if input is already an instance of ManimAutomataInput
 
 
+    def run_sequence(self, token, state_pointers, iteration_history: list, predetermined_transition: "ManimTransition" = None) -> list[State]:
+        next_states = []
+        for state_pointer in state_pointers: #look at each state and calculate the steps that state can take.
+            step_result, next_neighbour_states, transitions = self.automaton_step(token, state_pointer) #simulates the machine
+            
+            iteration_history.append({
+                "state_pointer": state_pointer,
+                "next_neighbour_states": next_neighbour_states,
+                "transitions": transitions,
+                "result": step_result,
+                "token": token
+            })
 
+            if self.nda_builder:
+                path_options = self.generate_next_state_options(state_pointer, transition_ids)
+                user_choice = self.cli.display_dictionary_options(path_options)
+                transition = path_options[user_choice][1] #get transition given user choice
+                
+                #record the transition choice
+                self.recorded_path.append((transition.transition_from.name, transition.transition_to.name))
+
+                transition_ids = [transition.id] #There is now only one transition that the state_pointer can take
+                next_neighbour_states = [transition.transition_to] #There is now only one state that the state_pointer can go to
+
+            #if step result is False then there are no more steps, check for final state and highlight state pointer as finished.
+            # for transition in transitions:
+            #     list_of_animations.append(self.step(transition, token, state_pointer, step_result)) # self.step returns a list of animations for that step
+            
+            #if successful point to the next state
+            if step_result is True:
+                if len(next_neighbour_states) > 0:
+                    next_states = next_states + next_neighbour_states
+
+            # if len(next_neighbour_states) == 0: #if there are no more states or transitions left
+            #     if self.check_automaton_result(state_pointers): #if the automaton has an active accepting state
+            #         list_of_animations.append(self.generate_accept_animations())
+            #     else: #if there is no final state then the machine is not accepted.
+            #         list_of_animations.append(self.generate_reject_animations())
+
+        return next_states
+              
+   
+    def run_input_through_automaton(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None) -> list:
+        """
+        parameters:
+            automaton_path: provides a single path used to navigate through the nda, 
+            the purpose of this is to allow the user to animate a single path through
+            the nda instead of animating all of the branches that are created by the nda.
+        """
+            
+        # example_structure = [("q0", "q1")]
+        # if this transition does not exist or the token does not match 
+        # then return error with the number of the tuple in the list
+        if automaton_path_name: # The nda will animate the predetermined path from the user
+            automaton_path = self.load_recorded_path_from_file(automaton_path_name)
+            return self.play_automaton_path(input, automaton_path) #create animations to do with given path
+        elif self.nda_builder: # Stores the path of of a single branch within the nda
+            self.recorded_path = []
+
+        #keeps track of what happend throughout each iteration
+        global_history = {}
+
+        initial_state = self.get_initial_state()
+        state_pointers = [initial_state] # Keeps track of all the states that are activated
+
+        # Animate the automaton going through the sequence
+        for i, token in enumerate(input.tokens):
+            iteration_history = []
+
+            state_pointers = self.run_sequence(token, state_pointers, iteration_history) #goes through each state_pointer
+
+
+            global_history[i] = {
+                "token": token,
+                "iteration_history": iteration_history
+            }
+        
+        #export the recorded path so the user can use it again without using nda builder
+        if self.nda_builder:
+            self.export_recorded_path_to_file()
+
+        return global_history
+
+    def generate_next_state_options(self, state_pointer, transitions):
+        options = {}
+        for index, transition in enumerate(transitions):
+            next_state = transition.transition_to
+            options[index] = (f"{state_pointer.name} --> {next_state.name}", transition)
+
+        return options
+
+    def export_recorded_path_to_file(self):
+        with open("recorded_path.txt", "w") as fp:
+            json.dump(self.recorded_path, fp)
+
+    def load_recorded_path_from_file(self, file_name):
+        with open(f"{file_name}", "r") as fp:
+            path_list = json.load(fp)
+            #check that the type is a list
+            if type(path_list) is list:
+                return path_list
+        return None
+
+
+    def play_string(self, input: Union[str, "ManimAutomataInput"]) -> list:
+
+        #run the input through the machine, returning a history of what happend
+        history = self.run_input_through_automaton(input)
+
+        list_of_animations = self.generate_history_animations(history)
+
+        return list_of_animations
+
+
+    def generate_history_animations(self, history):
+        """Given a history of events of each iteration of the input ran through the manim automaton,
+        generate all of the manim animations to visualise the process of the input going through the
+        automaton"""
+
+        list_of_animations = []
+
+        #generate the pre-run animations
+        state_pointer = self.get_initial_state()
+        #Highlight current state with yellow
+        list_of_animations.append([FadeToColor(state_pointer, color=YELLOW)])
+
+
+        for iteration_key in history:
+            token = history[iteration_key]["token"] #list of step histories
+            iteration_history = history[iteration_key]["iteration_history"]
+
+            #animate the token highlight
+            list_of_animations.append(
+                [ManimAutomataInput.highlight_token(token, self.animation_style)]
+            )
+
+            for step_history in iteration_history:
+                list_of_animations = list_of_animations + self.animate_step_history(step_history)
+
+            #animate the token fades
+            list_of_animations.append(
+                [token.animate.set_opacity(0.5)]
+            )
+
+        #generate outcome animations
+
+
+        return list_of_animations
+
+    def animate_step_history(self, step_history) -> list:
+        list_of_animations = []
+
+
+        state_pointer = step_history["state_pointer"]
+        next_neighbour_states = step_history["next_neighbour_states"]
+        transitions = step_history["transitions"]
+        step_result = step_history["result"]
+        token = step_history["token"]
+
+
+       #if step result is False then there are no more steps, check for final state and highlight state pointer as finished.
+        for transition in transitions:
+            list_of_animations.append(self.step(transition, token, state_pointer, step_result)) # self.step returns a list of animations for that step
+        
+            #if successful point to the next state
+            if step_result is True:
+                if len(next_neighbour_states) > 0:
+                    list_of_animations.append([FadeToColor(state_pointer, color=BLUE)])
+                    list_of_animations.append([FadeToColor(x, color=YELLOW) for x in next_neighbour_states])
+
+                    list_of_animations.append([FadeToColor(transition, color=WHITE)])
+
+            if len(next_neighbour_states) == 0: #if there are no more states or transitions left
+                if self.check_automaton_result([state_pointer]): #if the automaton has an active accepting state
+                    list_of_animations.append(self.generate_accept_animations())
+                else: #if there is no final state then the machine is not accepted.
+                    list_of_animations.append(self.generate_reject_animations())
+
+        return list_of_animations
+
+
+    def generate_accept_animations(self):
+        list_of_accept_animations = []
+
+        text = Tex("ACCEPTED", color=GREEN, font_size=100)
+        text.set_x(self.manim_automata_input.get_x())
+        text.set_y(self.manim_automata_input.get_y())
+
+        list_of_accept_animations.append(Transform(self.manim_automata_input, text))
+        # list_of_accept_animations.append(FadeToColor(self, color=GREEN))
+
+        return list_of_accept_animations
+
+    def generate_reject_animations(self):
+        list_of_reject_animations = []
+
+        text = Tex("REJECTED", color=RED, font_size=100)
+        text.set_x(self.manim_automata_input.get_x())
+        text.set_y(self.manim_automata_input.get_y())
+
+        list_of_reject_animations.append(Transform(self.manim_automata_input, text))
+        # list_of_reject_animations.append(FadeToColor(self, color=RED))
+
+        return list_of_reject_animations
+
+
+    
+    
+    def step(self, manim_transition: ManimTransition, token: "Tex", state_pointer: State, result: bool) -> list:
+        #creates a list of animations for the step
+        list_of_step_animations = []
+        if manim_transition == None: #there is no possible transition
+            list_of_step_animations.append(
+                token.animate.set_color(RED) # create a custom animation to signify result
+            )
+        else:
+            #move camera with every state, using the state_pointer
+            if self.camera_follow is True: #need someway to replace
+                # list_of_step_animations.append(
+                #     self.camera.frame.animate.move_to(self.get_manim_state(state_pointer)).scale(1)
+                # )
+                pass
+            #Animation that highlights the transition - Green for True and red otherwise
+            #Call function that handles all the transition animations
+           
+            list_of_step_animations.append(
+                manim_transition.animate_transition(result)
+            )
+
+            
+        
+        return list_of_step_animations
 
 
 

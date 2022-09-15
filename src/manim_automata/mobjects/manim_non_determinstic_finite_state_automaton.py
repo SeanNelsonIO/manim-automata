@@ -52,75 +52,6 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
 
         return list_of_animations
 
-    def step(self, manim_transition: ManimTransition, token: "Tex", state_pointer: State, result: bool) -> list:
-        #creates a list of animations for the step
-        list_of_step_animations = []
-        if manim_transition == None: #there is no possible transition
-            list_of_step_animations.append(
-                token.animate.set_color(RED) # create a custom animation to signify result
-            )
-        else:
-            #move camera with every state, using the state_pointer
-            if self.camera_follow is True: #need someway to replace
-                # list_of_step_animations.append(
-                #     self.camera.frame.animate.move_to(self.get_manim_state(state_pointer)).scale(1)
-                # )
-                pass
-
-            #Animation that highlights the transition - Green for True and red otherwise
-            list_of_step_animations.append(
-                manim_transition.animate_transition(result)
-            )
-
-        
-        return list_of_step_animations
-
-
-    def generate_next_state_options(self, state_pointer, transitions):
-        options = {}
-        for index, transition in enumerate(transitions):
-            next_state = transition.transition_to
-            options[index] = (f"{state_pointer.name} --> {next_state.name}", transition)
-
-        return options
-
-    def export_recorded_path_to_file(self):
-        with open("recorded_path.txt", "w") as fp:
-            json.dump(self.recorded_path, fp)
-
-    def load_recorded_path_from_file(self, file_name):
-        with open(f"{file_name}", "r") as fp:
-            path_list = json.load(fp)
-            #check that the type is a list
-            if type(path_list) is list:
-                return path_list
-        return None
-              
-
-    def generate_accept_animations(self):
-        list_of_accept_animations = []
-
-        text = Tex("ACCEPTED", color=GREEN, font_size=100)
-        text.set_x(self.manim_automata_input.get_x())
-        text.set_y(self.manim_automata_input.get_y())
-
-        list_of_accept_animations.append(Transform(self.manim_automata_input, text))
-        # list_of_accept_animations.append(FadeToColor(self, color=GREEN))
-
-        return list_of_accept_animations
-
-    def generate_reject_animations(self):
-        list_of_reject_animations = []
-
-        text = Tex("REJECTED", color=RED, font_size=100)
-        text.set_x(self.manim_automata_input.get_x())
-        text.set_y(self.manim_automata_input.get_y())
-
-        list_of_reject_animations.append(Transform(self.manim_automata_input, text))
-        # list_of_reject_animations.append(FadeToColor(self, color=RED))
-
-        return list_of_reject_animations
-
 
     def play_automaton_path(self, input, automaton_path: list[tuple]):
         list_of_animations = self.initialisation_animation(input)
@@ -295,7 +226,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
                 # self.list_of_animations.append([FadeToColor(next_states[0], color=YELLOW)]) 
                 list_of_animations.append([FadeToColor(x, color=YELLOW) for x in next_states])
 
-    def play_sequence(self, token, state_pointers, list_of_animations, predetermined_transition: "ManimTransition" = None) -> list[State]:
+    def _play_sequence(self, token, state_pointers, list_of_animations, predetermined_transition: "ManimTransition" = None) -> list[State]:
         next_states = []
         for state_pointer in state_pointers: #look at each state and calculate the steps that state can take.
             step_result, next_neighbour_states, transitions = self.automaton_step(token, state_pointer) #simulates the machine
@@ -332,7 +263,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         return next_states
               
    
-    def play_string(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None) -> list:
+    def _play_string(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None) -> list:
         """
         parameters:
             automaton_path: provides a single path used to navigate through the nda, 
