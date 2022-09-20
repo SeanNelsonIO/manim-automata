@@ -158,15 +158,15 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         return ManimAutomataInput(input_string, animation_style=self.animation_style)
         
     #returns a list of animations to run through
-    @abc.abstractmethod
-    def play_string(self, input: Union[str,"ManimAutomataInput"]) -> list:
-        """Documentation TODO"""
-        return
+    # @abc.abstractmethod
+    # def play_string(self, input: Union[str,"ManimAutomataInput"]) -> list:
+    #     """Documentation TODO"""
+    #     return
     
-    @abc.abstractmethod
-    def step(self, manim_transition: ManimTransition, token: "Tex", state_pointer: State, result: bool) -> list:
-        """Documentation TODO"""
-        return
+    # @abc.abstractmethod
+    # def step(self, manim_transition: ManimTransition, token: "Tex", state_pointer: State, result: bool) -> list:
+    #     """Documentation TODO"""
+    #     return
         
     def set_default_position_of_input_string(self):
         list_of_input_string_animations = []
@@ -299,8 +299,15 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
                 return path_list
         return None
 
-
     def play_string(self, input: Union[str, "ManimAutomataInput"]) -> list:
+        if type(input) is str:
+            #create mobject of input string
+            self.manim_automata_input = self.construct_automaton_input(input)
+            #position the mobject
+            self.set_default_position_of_input_string()
+            #display manim_automaton_input to the screen
+            list_of_animations.append(FadeIn(self.manim_automata_input))
+        else: self.manim_automata_input = input #if input is already an instance of ManimAutomataInput
 
         #run the input through the machine, returning a history of what happend
         history = self.run_input_through_automaton(input)
@@ -322,7 +329,6 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         #Highlight current state with yellow
         list_of_animations.append([FadeToColor(state_pointer, color=YELLOW)])
 
-
         for iteration_key in history:
             token = history[iteration_key]["token"] #list of step histories
             iteration_history = history[iteration_key]["iteration_history"]
@@ -341,8 +347,6 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
             )
 
         #generate outcome animations
-
-
         return list_of_animations
 
     def animate_step_history(self, step_history) -> list:
@@ -356,23 +360,18 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         token = step_history["token"]
 
 
-       #if step result is False then there are no more steps, check for final state and highlight state pointer as finished.
-        for transition in transitions:
-            list_of_animations.append(self.step(transition, token, state_pointer, step_result)) # self.step returns a list of animations for that step
+        #if step result is False then there are no more steps, check for final state and highlight state pointer as finished.
+        step_animations = self.step(transitions, token, state_pointer, next_neighbour_states, step_result) # self.step returns a list of animations for that step
         
-            #if successful point to the next state
-            if step_result is True:
-                if len(next_neighbour_states) > 0:
-                    list_of_animations.append([FadeToColor(state_pointer, color=BLUE)])
-                    list_of_animations.append([FadeToColor(x, color=YELLOW) for x in next_neighbour_states])
+        if step_animations is not None:
+            list_of_animations = list_of_animations + step_animations
 
-                    list_of_animations.append([FadeToColor(transition, color=WHITE)])
+        if len(next_neighbour_states) == 0: #if there are no more states or transitions left
+            if self.check_automaton_result([state_pointer]): #if the automaton has an active accepting state
+                list_of_animations.append(self.generate_accept_animations())
+            else: #if there is no final state then the machine is not accepted.
+                list_of_animations.append(self.generate_reject_animations())
 
-            if len(next_neighbour_states) == 0: #if there are no more states or transitions left
-                if self.check_automaton_result([state_pointer]): #if the automaton has an active accepting state
-                    list_of_animations.append(self.generate_accept_animations())
-                else: #if there is no final state then the machine is not accepted.
-                    list_of_animations.append(self.generate_reject_animations())
 
         return list_of_animations
 
@@ -402,47 +401,36 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         return list_of_reject_animations
 
 
-    
-    
-    def step(self, manim_transition: ManimTransition, token: "Tex", state_pointer: State, result: bool) -> list:
+    def step(self, manim_transitions: list[ManimTransition], token: "Tex", state_pointer: State, next_neighbour_states: list, step_result: bool) -> list:
+        if len(manim_transitions) == 0: #if there are no transitions
+            return None
         #creates a list of animations for the step
         list_of_step_animations = []
-        if manim_transition == None: #there is no possible transition
-            list_of_step_animations.append(
-                token.animate.set_color(RED) # create a custom animation to signify result
-            )
-        else:
-            #move camera with every state, using the state_pointer
-            if self.camera_follow is True: #need someway to replace
-                # list_of_step_animations.append(
-                #     self.camera.frame.animate.move_to(self.get_manim_state(state_pointer)).scale(1)
-                # )
-                pass
-            #Animation that highlights the transition - Green for True and red otherwise
-            #Call function that handles all the transition animations
-           
-            list_of_step_animations.append(
-                manim_transition.animate_transition(result)
-            )
 
-            
+        activate_transition_animation = [transition.animate_transition(step_result) for transition in manim_transitions]
+
+        #if successful point to the next state
+        state_animations = []
+        if step_result is True:
+            if len(next_neighbour_states) > 0:
+                state_animations.append(FadeToColor(state_pointer, color=BLUE))
+
+                state_animations = state_animations + [FadeToColor(x, color=YELLOW) for x in next_neighbour_states]
+
+
+        deactivate_transition_animation = [FadeToColor(transition, color=WHITE) for transition in manim_transitions]
         
+        #add the animations in the correct order
+        list_of_step_animations.append(
+            activate_transition_animation
+        )
+
+        list_of_step_animations.append(
+            state_animations
+        )
+        
+        list_of_step_animations.append(
+            deactivate_transition_animation
+        )
+            
         return list_of_step_animations
-
-
-
-
-    # def parse_animation_style(self):
-        # pass
-
-
-    # def build_animation(self, animation_function, color, subject, **kwargs):
-    #     """Build and returns line of animation code"""
-    #     animation_function()
-
-    #     return animation_function
-
-
-    # def move_camera(self):
-    #     # self.camera.frame.animate.move_to(self.get_manim_state(state_pointer)).scale(1)
-    #     pass

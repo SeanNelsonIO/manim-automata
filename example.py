@@ -61,8 +61,6 @@ class Test(MovingCameraScene):
 
         # print(process.memory_info().rss)
         # Play all the animations generate from .play_string()
-
-        import inspect
         
         
 
@@ -156,6 +154,8 @@ class FiniteStateMachineTest(MovingCameraScene):
         )
 
         for sequence in manim_automaton.play_string(automaton_input):
-            for step in sequence:
-                self.play(step, run_time=0.5)
+            # print(sequence)
+            self.play(*sequence, run_time=0.5)
+            # for step in sequence:
+            #     self.play(step, run_time=0.5)
                 
