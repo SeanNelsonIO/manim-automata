@@ -1,4 +1,3 @@
-
 from ssl import DER_cert_to_PEM_cert
 from manim import *
 
@@ -106,175 +105,12 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         return next_state
 
 
-    #parent function that plays are the branches in "parallel"
-    def play__string(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None) -> list:
-        """
-        parameters:
-            automaton_path: provides a single path used to navigate through the nda, 
-            the purpose of this is to allow the user to animate a single path through
-            the nda instead of animating all of the branches that are created by the nda.
-        """
-        # if this transition does not exist or the token does not match 
-        # then return error with the number of the tuple in the list
-        if automaton_path_name: # The nda will animate the predetermined path from the user
-            automaton_path = self.load_recorded_path_from_file(automaton_path_name)
-            return self.play_automaton_path(input, automaton_path) #create animations to do with given path
-        elif self.nda_builder: # Stores the path of of a single branch within the nda
-            self.recorded_path = []
-
-        self.list_of_animations = self.initialisation_animation(input)
-
-        initial_state = self.get_initial_state()
-        list_of_animations = []
-        initial_branch = Branch(initial_state)
-
-        self.all_branches = [initial_branch] #stores all the branches produced by non-determinism
-        #need a branch to start with
-        
-        current_branches = self.all_branches
-        import gc
-        print("gc: ", len(gc.get_objects(generation=None)))
-        # Animate the automaton going through the sequence
-        for i, token in enumerate(self.manim_automata_input.tokens):
-            self.count_id = 0
-            self.list_of_animations.append([FadeToColor(token, color=YELLOW)]) #highlights the current token
-
-            current_branches = self.play_branches(token, current_branches, list_of_animations)
-            
-            self.list_of_animations.append([token.animate.set_opacity(0.5)]) #animates that the token has been used
-        
-
-        print("gc: ", len(gc.get_objects(generation=None)))
-        print("Branch: ", self.count_id, len(self.all_branches))
-        self.all_branches = []
-        print("gc: ", len(gc.get_objects(generation=None)))
-        
-
-        
-        #once the tokens have ended, check to see if there are any alive branches
-        #that end on a final state, if the nda accepts.
-        accepted = False
-        for branch in self.all_branches:
-            if branch.alive is True:
-                #check if the state_pointer is a final state
-                if branch.state_pointer.final is True:
-                    self.list_of_animations.append(self.generate_accept_animations())
-                    accepted = True
-                    break
-
-        if accepted is False:
-            self.list_of_animations.append(self.generate_reject_animations())
-           
-
-        #export the recorded path so the user can use it again without using nda builder
-        if self.nda_builder:
-            self.export_recorded_path_to_file()
-
-        return list_of_animations
-
     def pick_transition(self, state_pointer, transitions):
         path_options = self.generate_next_state_options(state_pointer, transitions)
         user_choice = self.cli.display_dictionary_options(path_options)
         transition = path_options[user_choice][1] #get transition given user choice
 
         return [transition.transition_to], [transition]
-
-    
-    def play__sequence(self, token, result, state_pointer, next_states, transitions, list_of_animations):
-        #if step result is False then there are no more steps, check for final state and highlight state pointer as finished.
-        for transition in transitions:
-            self.list_of_animations.append(self.step(transition, token, state_pointer, result)) #self.step returns a list of animations for that step
-        
-        #if successful point to the next state
-        if result is True:
-            if len(next_states) > 0:
-                #Broken TODO
-                # return
-                list_of_animations.append([FadeToColor(state_pointer, color=BLUE)])
-                # self.list_of_animations.append([state_pointer.animate.set_color(color=BLUE)])
-                # print([FadeToColor(state_pointer, color=BLUE)])
-                # self.list_of_animations.append([FadeToColor(next_states[0], color=YELLOW)]) 
-                list_of_animations.append([FadeToColor(x, color=YELLOW) for x in next_states])
-
-    def _play_sequence(self, token, state_pointers, list_of_animations, predetermined_transition: "ManimTransition" = None) -> list[State]:
-        next_states = []
-        for state_pointer in state_pointers: #look at each state and calculate the steps that state can take.
-            step_result, next_neighbour_states, transitions = self.automaton_step(token, state_pointer) #simulates the machine
-            
-            if self.nda_builder:
-                path_options = self.generate_next_state_options(state_pointer, transition_ids)
-                user_choice = self.cli.display_dictionary_options(path_options)
-                transition = path_options[user_choice][1] #get transition given user choice
-                
-                #record the transition choice
-                self.recorded_path.append((transition.transition_from.name, transition.transition_to.name))
-
-                transition_ids = [transition.id] #There is now only one transition that the state_pointer can take
-                next_neighbour_states = [transition.transition_to] #There is now only one state that the state_pointer can go to
-
-            #if step result is False then there are no more steps, check for final state and highlight state pointer as finished.
-            for transition in transitions:
-                list_of_animations.append(self.step(transition, token, state_pointer, step_result)) # self.step returns a list of animations for that step
-            
-            #if successful point to the next state
-            if step_result is True:
-                if len(next_neighbour_states) > 0:
-                    list_of_animations.append([FadeToColor(state_pointer, color=BLUE)])
-                    list_of_animations.append([FadeToColor(x, color=YELLOW) for x in next_neighbour_states])
-
-                    next_states = next_states + next_neighbour_states
-
-            if len(next_neighbour_states) == 0: #if there are no more states or transitions left
-                if self.check_automaton_result(state_pointers): #if the automaton has an active accepting state
-                    list_of_animations.append(self.generate_accept_animations())
-                else: #if there is no final state then the machine is not accepted.
-                    list_of_animations.append(self.generate_reject_animations())
-
-        return next_states
-              
-   
-    def _play_string(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None) -> list:
-        """
-        parameters:
-            automaton_path: provides a single path used to navigate through the nda, 
-            the purpose of this is to allow the user to animate a single path through
-            the nda instead of animating all of the branches that are created by the nda.
-        """
-            
-        # example_structure = [("q0", "q1")]
-        # if this transition does not exist or the token does not match 
-        # then return error with the number of the tuple in the list
-        if automaton_path_name: # The nda will animate the predetermined path from the user
-            automaton_path = self.load_recorded_path_from_file(automaton_path_name)
-            return self.play_automaton_path(input, automaton_path) #create animations to do with given path
-        elif self.nda_builder: # Stores the path of of a single branch within the nda
-            self.recorded_path = []
-
-        list_of_animations = self.initialisation_animation(input)
-
-        initial_state = self.get_initial_state()
-        state_pointers = [initial_state] # Keeps track of all the states that are activated
-
-        # Animate the automaton going through the sequence
-        for i, token in enumerate(self.manim_automata_input.tokens):
-            
-            #check if it is last token
-            if i == len(self.manim_automata_input.tokens)-1:
-                #animate for the final state
-                pass
-                
-            # list_of_animations.append([FadeToColor(token, color=YELLOW)]) #highlights the current token
-
-            state_pointers = self.play_sequence(token, state_pointers, list_of_animations) #generate the animations for this token sequence
-
-            list_of_animations.append([token.animate.set_opacity(0.5)]) #animates that the token has been used
-        
-        #export the recorded path so the user can use it again without using nda builder
-        if self.nda_builder:
-            self.export_recorded_path_to_file()
-
-        return list_of_animations
-
 
 
     #Implement branching in this method
@@ -307,21 +143,10 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         #need a branch to start with
     
         current_branches = self.all_branches
-        # import gc
-        # print("gc: ", len(gc.get_objects(generation=None)))
-        # Animate the automaton going through the sequence
 
         for i, token in enumerate(self.manim_automata_input.tokens):
-            # iteration_history = []
 
             current_branches = self.play_branches(token, current_branches)
-            # OR
-            # state_pointers = self.run_sequence(token, state_pointers, iteration_history) #goes through each state_pointer
-
-            # global_history[i] = {
-            #     "token": token,
-            #     "iteration_history": iteration_history
-            # }
            
         
         #export the recorded path so the user can use it again without using nda builder
@@ -332,16 +157,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         
         #Resolve branches
         chosen_branch = self.resolve_branches(self.all_branches) # picks a branch to generate an animation from
-        # print(self.all_branches)
 
-        # reduces branches into a few rather than many
-
-        # print(chosen_branch.history)
-        # print(self.all_branches[0].history)
-        #transitions are missing by this time, why?
-
-        #pick a history from the branches
-        #return history of chosen branch
         return chosen_branch.history
 
         
@@ -383,6 +199,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
 
         # global_history = {}
         #.......
+
 
 class Branch():
 
