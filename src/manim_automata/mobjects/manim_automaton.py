@@ -237,7 +237,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
 
         return next_states
               
-   
+   #Implement branching in this method
     def run_input_through_automaton(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None) -> list:
         """
         parameters:
@@ -268,7 +268,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
             state_pointers = self.run_sequence(token, state_pointers, iteration_history) #goes through each state_pointer
 
 
-            global_history[i] = {
+            global_history[token.id] = {
                 "token": token,
                 "iteration_history": iteration_history
             }
@@ -315,7 +315,6 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         list_of_animations = self.generate_history_animations(history)
 
         return list_of_animations
-
 
     def generate_history_animations(self, history):
         """Given a history of events of each iteration of the input ran through the manim automaton,
@@ -368,7 +367,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
 
         if len(next_neighbour_states) == 0: #if there are no more states or transitions left
             if self.check_automaton_result([state_pointer]): #if the automaton has an active accepting state
-                list_of_animations.append(self.generate_accept_animations())
+                list_of_animations.append(self.generate_accept_animations()) #THIS IS GENERATED BEFORE ALL BRANCHES HAVE FINISHED
             else: #if there is no final state then the machine is not accepted.
                 list_of_animations.append(self.generate_reject_animations())
 
@@ -434,3 +433,4 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         )
             
         return list_of_step_animations
+        

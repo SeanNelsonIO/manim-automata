@@ -1,5 +1,7 @@
 from manim import *
 
+import itertools
+
 class ManimAutomataInput(VGroup):
     """Class that describes the graphical representation of the input string,
     it is also used to simulate tautomata.
@@ -35,16 +37,12 @@ class ManimAutomataInput(VGroup):
         #token creation
         self.tokens = []
         spacing = 0
-        for token in input_string:
-            text_mobject = MathTex(token, font_size=font_size)
-            # text_mobject.set_x(self.get_x())
-            # text_mobject.set_y(self.get_y())
+        for token_symbol in input_string:
+            token_mobject = Token(token_symbol, spacing, font_size)
+            
 
-            text_mobject.set_x(0 + spacing)
-            text_mobject.set_y(0)
-
-            self.add(text_mobject)
-            self.tokens.append(text_mobject)
+            self.add(token_mobject)
+            self.tokens.append(token_mobject)
 
             spacing = spacing + 1
 
@@ -57,6 +55,22 @@ class ManimAutomataInput(VGroup):
         color = animation_style["token_highlight"]["color"]
 
         return animation_function(token, color=color)
+    
+
+class Token(MathTex):
+
+    id_iter = itertools.count()
+
+    def __init__(self, token_symbol, spacing, font_size: int = 100, **kwargs) -> None:
+
+        super().__init__(token_symbol, font_size=font_size, **kwargs)
+
+        self.id = next(self.id_iter)
+
+        self.set_x(0 + spacing)
+        self.set_y(0)
+
+        # self.text
 
 
 
