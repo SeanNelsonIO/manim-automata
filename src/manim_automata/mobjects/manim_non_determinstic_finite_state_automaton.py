@@ -9,6 +9,7 @@ from .manim_transition import ManimTransition
 from typing import Union
 
 import json
+import pprint
 
 import itertools
 
@@ -153,8 +154,10 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
         if self.nda_builder:
             self.export_recorded_path_to_file()
 
-        #Once we are at the end of the loop then current branches will contain all the branches that have made it to the end
-        
+        #goes through each branch and records whether the branch is alive in the branche's history
+        for branch in self.all_branches:
+            branch.complete_branch()
+
         #Resolve branches
         chosen_branch = self.resolve_branches(self.all_branches) # picks a branch to generate an animation from
 
@@ -175,7 +178,7 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
             # self.play__sequence(token, result, state_pointer, next_states, transitions, list_of_animations) this generates the animations
 
             # state_pointers = self.run_sequence(token, state_pointers, iteration_history) #goes through each state_pointer
-
+            
             new_branches = branch.step_through(result, next_states, transitions, token) #assign new state_pointer to current branch and create divergent branches(if any)
 
             if result is False: #branch wasn't able to transition given a token, therefore language is rejected for branch.
@@ -189,16 +192,18 @@ class ManimNonDeterminsticFiniteAutomaton(ManimAutomaton):
                     self.all_branches.append(branch)
             
         return active_branches
-
+    
     #resolves all histories of each branch into one branch, display all branches
     def resolve_branches(self, branches):
         for branch in branches:
             if branch.alive == True and branch.state_pointer.final == True:
+                pprint.pprint(branch.history)
+                print("branch id:", branch.id, branch.alive)
                 return branch
 
-
-        # global_history = {}
-        #.......
+        #merge all branches to display all branches
+        #use a super script or subscript to show how many branches are on a state
+        #if any branch passes then the machine passes
 
 
 class Branch():
@@ -206,12 +211,10 @@ class Branch():
     id_iter = itertools.count()
     # recorded_path: list #records the path/history of the branch TODO
     # state_pointer: State #keeps track of the current state
-
     # stack: list #pushdown automaton stack, each branch has its own stack
-
     # history: list
 
-    def __init__(self, state_pointer, stack: list = None, history: dict = None) -> None:
+    def __init__(self, state_pointer, stack: list = None, history: dict = None, divergent: bool = False, branch_transition = None, result = None, token = None) -> None:
         self.id = next(self.id_iter)
         self.alive = True
         # self.stack = stack
@@ -224,6 +227,9 @@ class Branch():
             self.history = history
 
         self.state_pointer = state_pointer #stores the state that the branch is currently on
+
+        if divergent == True:
+            self.step_through(result, [branch_transition.transition_to], [branch_transition], token)
     
     def step_through(self, result, next_states, transitions, token) -> list["Branch"]: #checks to see if branch diverges
         new_branches = [] #stores the new divergent branches
@@ -234,9 +240,9 @@ class Branch():
 
             #every other possible path diverges into a new branch
             for transition in transitions: #create branch for every other path
-                new_branches.append(self.diverge_branch(transition.transition_to)) # do we create two next branches or pick one to be branched?
+                new_branches.append(self.diverge_branch(transition, result, token)) # do we create two next branches or pick one to be branched?
             
-           
+            
             #record the path of the current branch
             self.record_history(result, [chosen_transition.transition_to], [chosen_transition], token)
 
@@ -247,8 +253,9 @@ class Branch():
 
         return new_branches
 
-    def diverge_branch(self, next_state) -> "Branch": #creates another branch of current branch
-        divergent = Branch(next_state, self.stack.copy(), self.history.copy())
+    def diverge_branch(self, branch_transition, result, token) -> "Branch": #creates another branch of current branch
+        divergent = Branch(self.state_pointer, self.stack.copy(), self.history.copy(), divergent=True, branch_transition=branch_transition, result=result, token=token)
+        # divergent = Branch(next_state, self.stack.copy(), self.history.copy(), divergent=True)
         return divergent
 
     def reject(self) -> None: #branch did not accept string.
@@ -273,3 +280,17 @@ class Branch():
 
     def __str__(self) -> str:
         return 'Branch id: {self.id}'.format(self=self)
+
+    def complete_branch(self):
+        self.history["information"] = {
+            "alive": self.alive,
+            "automaton_result": self.check_branch_result()
+        }
+        
+    def check_branch_result(self):
+        if self.alive == True and self.state_pointer.final == True:
+            return True
+        return False
+
+
+

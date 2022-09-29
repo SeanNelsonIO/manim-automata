@@ -1,3 +1,4 @@
+from re import S
 from manim import *
 from .automata_dependencies.automata import FiniteStateAutomaton
 from .manim_state import ManimState, State
@@ -314,6 +315,11 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
 
         list_of_animations = self.generate_history_animations(history)
 
+                    # if self.check_automaton_result([state_pointer]): #if the automaton has an active accepting state
+                    #     list_of_animations.append(self.generate_accept_animations()) #THIS IS GENERATED BEFORE ALL BRANCHES HAVE FINISHED
+                    # else: #if there is no final state then the machine is not accepted.
+                    #     list_of_animations.append(self.generate_reject_animations())
+
         return list_of_animations
 
     def generate_history_animations(self, history):
@@ -326,24 +332,36 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         #generate the pre-run animations
         state_pointer = self.get_initial_state()
         #Highlight current state with yellow
-        list_of_animations.append([FadeToColor(state_pointer, color=YELLOW)])
+        list_of_animations.append(self.highlight_initial_state(state_pointer))
 
         for iteration_key in history:
-            token = history[iteration_key]["token"] #list of step histories
-            iteration_history = history[iteration_key]["iteration_history"]
+            if iteration_key == "information": #provides information about the automaton and if it passed
+                if history[iteration_key]["automaton_result"]: #if the automaton has an active accepting state
+                    list_of_animations.append(self.generate_accept_animations()) #THIS IS GENERATED BEFORE ALL BRANCHES HAVE FINISHED
+                else: #if there is no final state then the machine is not accepted.
+                    list_of_animations.append(self.generate_reject_animations())
+            else:
+                token = history[iteration_key]["token"] #list of step histories
+                iteration_history = history[iteration_key]["iteration_history"]
 
-            #animate the token highlight
-            list_of_animations.append(
-                [ManimAutomataInput.highlight_token(token, self.animation_style)]
-            )
+                #animate the token highlight
+                list_of_animations.append(
+                    [ManimAutomataInput.highlight_token(token, self.animation_style)]
+                )
 
-            for step_history in iteration_history:
-                list_of_animations = list_of_animations + self.animate_step_history(step_history)
+                for step_history in iteration_history:
+                    list_of_animations = list_of_animations + self.animate_step_history(step_history) 
 
-            #animate the token fades
-            list_of_animations.append(
-                [token.animate.set_opacity(0.5)]
-            )
+                   
+                animate_subscripts = True #temp variable, TODO: intergrate into the api for user to choose
+                if animate_subscripts == True:
+                    list_of_animations.append(self.animate_subscripts(iteration_history))
+                    
+
+                #animate the token fades
+                list_of_animations.append(
+                    [token.animate.set_opacity(0.5)]
+                )
 
         #generate outcome animations
         return list_of_animations
@@ -365,14 +383,13 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         if step_animations is not None:
             list_of_animations = list_of_animations + step_animations
 
-        if len(next_neighbour_states) == 0: #if there are no more states or transitions left
-            if self.check_automaton_result([state_pointer]): #if the automaton has an active accepting state
-                list_of_animations.append(self.generate_accept_animations()) #THIS IS GENERATED BEFORE ALL BRANCHES HAVE FINISHED
-            else: #if there is no final state then the machine is not accepted.
-                list_of_animations.append(self.generate_reject_animations())
-
-
         return list_of_animations
+
+    def highlight_initial_state(self, initial_state):
+        new_subscript_object = Tex(1, color=YELLOW)
+        new_subscript_object.set_x(initial_state.subscript.get_x())
+        new_subscript_object.set_y(initial_state.subscript.get_y())
+        return [FadeToColor(initial_state, color=YELLOW), Transform(initial_state.subscript, new_subscript_object)]
 
 
     def generate_accept_animations(self):
@@ -433,4 +450,46 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         )
             
         return list_of_step_animations
+
+    def animate_subscripts(self, iteration_history):
+        animations = []
+        #record the number of branches that end on each states
+        state_counter = {}
+        # for state in self.states:
+        #     state_counter[state.id] = 0
+            
+        for step_history in iteration_history:
+            next_neighbour_states = step_history["next_neighbour_states"]
+            
+            for state in next_neighbour_states:
+                counter = state_counter.setdefault(state.id, 0) # key might exist already
+                state_counter[state.id] = state_counter[state.id] + 1
+                        
+                # state_counter.setdefault(state.id, 1)
+                # state_counter[state.id] = state_counter[state.id] + 1
+    
+        for state in self.states:
+            if state.id in state_counter:
+                new_subscript_object = Tex(state_counter[state.id], color=YELLOW)
+                new_subscript_object.set_x(state.subscript.get_x())
+                new_subscript_object.set_y(state.subscript.get_y())
+                animations.append(Transform(state.subscript, new_subscript_object))
+            else: 
+                new_subscript_object = Tex(0, color=BLUE)
+                new_subscript_object.set_x(state.subscript.get_x())
+                new_subscript_object.set_y(state.subscript.get_y())
+                animations.append(Transform(state.subscript, new_subscript_object))
+                
+
+        
+        return animations
+
+
+
+        # for state in self.states:
+        #     self.states.update_subscript()
+
+        #pseudo code
+        # for subscripts in self.subscripts:
+        #     subscripts.update(number_of_branches_on_state)
         

@@ -31,9 +31,14 @@ class ManimState(State, VGroup):
         
         self.text = Tex(name, font_size=100)
         self.circle = Circle(radius=2, color=BLUE)
-    
-        VGroup.__init__(self, self.circle, self.text, name=name, **kwargs)
 
+        if True:
+            self.initialise_subscript()
+            VGroup.__init__(self, self.circle, self.text, self.subscript, name=name, **kwargs)
+        
+        else:
+            VGroup.__init__(self, self.circle, self.text, name=name, **kwargs)
+    
         self.set_x(x/scaling)
         self.set_y((y*-1)/scaling) # multiply y by -1 to flip the y axis, more similar to JFLAP
 
@@ -42,8 +47,20 @@ class ManimState(State, VGroup):
             self.set_to_final_state()
         if self.initial:
             self.set_to_initial_state()
-        
-        
+
+    def update_subscript(self, number):
+        self.remove(self.subscript)
+        self.subscript = self.subscript = Tex(number, font_size=50)
+        self.subscript.set_x(self.text.get_x() + -0.5)
+        self.subscript.set_y(self.text.get_y() + -0.5)
+        self.add(self.subscript)
+
+    def initialise_subscript(self):
+        self.subscript = Tex(0, font_size=50)
+        self.subscript.set_x(self.text.get_x() + -0.5)
+        self.subscript.set_y(self.text.get_y() + -0.5)
+
+
     def set_to_final_state(self) -> None:
         state_outer = Circle(radius=self.width*0.4, color=BLUE)
         #move x and y of outerloop to be in the same position as parameter:state
@@ -56,6 +73,4 @@ class ManimState(State, VGroup):
         # self.manim_state = VGroup(arrow, self.manim_state)
         self.add(arrow)
 
-    def highlight_state(self):
-        pass
 

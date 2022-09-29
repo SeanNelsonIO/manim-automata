@@ -106,9 +106,6 @@ class Test(MovingCameraScene):
                 
         
                     
-
-
-
 class PushDownTest(MovingCameraScene):
     def construct(self):
         manim_pushdown_automaton = ManimPushDownAutomaton(xml_file='pushdown_automaton.jff')
