@@ -333,7 +333,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         state_pointer = self.get_initial_state()
         #Highlight current state with yellow
         list_of_animations.append(self.highlight_initial_state(state_pointer))
-
+        print(history)
         for iteration_key in history:
             if iteration_key == "information": #provides information about the automaton and if it passed
                 if history[iteration_key]["automaton_result"]: #if the automaton has an active accepting state
@@ -479,8 +479,6 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
                 new_subscript_object.set_x(state.subscript.get_x())
                 new_subscript_object.set_y(state.subscript.get_y())
                 animations.append(Transform(state.subscript, new_subscript_object))
-                
-
         
         return animations
 

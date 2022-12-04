@@ -18,7 +18,6 @@ import gc
 class Test(MovingCameraScene):
     def construct(self):
         
-        
         manim_automaton = ManimNonDeterminsticFiniteAutomaton(xml_file='example_machine.jff', cli=False)
         
     
@@ -127,6 +126,10 @@ class PushDownTest(MovingCameraScene):
             FadeIn(automaton_input)
         )
 
+        for sequence in manim_pushdown_automaton.play_string(automaton_input):
+            # print(sequence)
+            self.play(*sequence, run_time=0.5)
+
 
 class FiniteStateMachineTest(MovingCameraScene):
     def construct(self):
@@ -139,7 +142,7 @@ class FiniteStateMachineTest(MovingCameraScene):
         self.camera.frame.move_to(manim_automaton)
 
         #Create an mobject version of input for the manim_automaton
-        automaton_input = manim_automaton.construct_automaton_input("110011")
+        automaton_input = manim_automaton.construct_automaton_input("111011")
 
         #Position automaton_input on the screen to avoid overlapping.
         automaton_input.shift(LEFT * 2)
@@ -182,5 +185,5 @@ class NonFiniteStateMachineTest(MovingCameraScene):
         for sequence in manim_automaton.play_string(automaton_input):
             # print(sequence)
             self.play(*sequence, run_time=0.5)
-            # for step in sequence:
-            #     self.play(step, run_time=0.5)
+            for step in sequence:
+                self.play(step, run_time=0.5)
