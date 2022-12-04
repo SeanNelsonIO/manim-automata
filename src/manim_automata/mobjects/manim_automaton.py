@@ -229,6 +229,8 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
             if step_result is True:
                 if len(next_neighbour_states) > 0:
                     next_states = next_states + next_neighbour_states
+            
+            
 
             # if len(next_neighbour_states) == 0: #if there are no more states or transitions left
             #     if self.check_automaton_result(state_pointers): #if the automaton has an active accepting state
@@ -333,7 +335,6 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         state_pointer = self.get_initial_state()
         #Highlight current state with yellow
         list_of_animations.append(self.highlight_initial_state(state_pointer))
-        print(history)
         for iteration_key in history:
             if iteration_key == "information": #provides information about the automaton and if it passed
                 if history[iteration_key]["automaton_result"]: #if the automaton has an active accepting state
@@ -418,36 +419,54 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
 
 
     def step(self, manim_transitions: list[ManimTransition], token: "Tex", state_pointer: State, next_neighbour_states: list, step_result: bool) -> list:
-        if len(manim_transitions) == 0: #if there are no transitions
-            return None
         #creates a list of animations for the step
         list_of_step_animations = []
 
-        activate_transition_animation = [transition.animate_transition(step_result) for transition in manim_transitions]
+        if step_result is False: #if branch dies turn state red
+            state_died_animation = []
+            state_revert_back_to_default_animation = []
 
-        #if successful point to the next state
-        state_animations = []
-        if step_result is True:
-            if len(next_neighbour_states) > 0:
-                state_animations.append(FadeToColor(state_pointer, color=BLUE))
+            state_died_animation.append(FadeToColor(state_pointer, color=RED))
 
-                state_animations = state_animations + [FadeToColor(x, color=YELLOW) for x in next_neighbour_states]
+            state_revert_back_to_default_animation.append(FadeToColor(state_pointer, color=BLUE))
+
+            list_of_step_animations.append(
+                state_died_animation
+            )
+            list_of_step_animations.append(
+                state_revert_back_to_default_animation
+            )
 
 
-        deactivate_transition_animation = [FadeToColor(transition, color=WHITE) for transition in manim_transitions]
+        else:
+            activate_transition_animation = [transition.animate_transition(step_result) for transition in manim_transitions]
+
+            #if successful point to the next state
+            state_animations = []
+            
+            if step_result is True:
+                
+                if len(next_neighbour_states) > 0:
+                    state_animations.append(FadeToColor(state_pointer, color=BLUE))
+
+                    state_animations = state_animations + [FadeToColor(x, color=YELLOW) for x in next_neighbour_states]
+            
+                
+
+            deactivate_transition_animation = [FadeToColor(transition, color=WHITE) for transition in manim_transitions]
         
-        #add the animations in the correct order
-        list_of_step_animations.append(
-            activate_transition_animation
-        )
+            #add the animations in the correct order
+            list_of_step_animations.append(
+                activate_transition_animation
+            )
 
-        list_of_step_animations.append(
-            state_animations
-        )
+            list_of_step_animations.append(
+                state_animations
+            )
         
-        list_of_step_animations.append(
-            deactivate_transition_animation
-        )
+            list_of_step_animations.append(
+                deactivate_transition_animation
+            )
             
         return list_of_step_animations
 
