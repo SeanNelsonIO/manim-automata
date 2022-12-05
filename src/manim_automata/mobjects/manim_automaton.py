@@ -65,9 +65,10 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         self.animation_style = animation_style
         self.camera_follow = camera_follow
 
-
         if manim_animations is None: #if user doesn't provide their own class set to default
             self.manim_animations = ManimAnimations()
+        else:
+            self.manim_animations = manim_animations
 
         self.cli = None
         if cli:

@@ -35,14 +35,9 @@ To use manim-automata in your project, you can:
 * Add ``from manim_automata import *`` to your script.
 Once manim-automata has been imported, you can use the ManimAutomata class to create automata.
 
+
 How To Use
 ==========
-
-
-
-
-Example
-=======
 ```python
 class Automaton(MovingCameraScene):
     def construct(self):
@@ -73,65 +68,51 @@ class Automaton(MovingCameraScene):
 ```
 To run the code and generate the video, run:
 
-* manim -pqh <name_of_script.py> Automaton
+* manim -pql <name_of_script.py> Automaton
+
+run with -pqh instead of -pql to have highquality version
 
 
-XML file used:
-```
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--Created with JFLAP 7.1.--><structure>
-	<type>fa</type>
-	<automaton>
-		<!--The list of states.-->
-		<state id="0" name="q0">
-			<x>84.0</x>
-			<y>122.0</y>
-			<initial/>
-		</state>
-		<state id="1" name="q1">
-			<x>218.0</x>
-			<y>175.0</y>
-		</state>
-		<state id="2" name="q2">
-			<x>386.0</x>
-			<y>131.0</y>
-			<final/>
-		</state>
-		<state id="3" name="q3">
-			<x>227.0</x>
-			<y>36.0</y>
-		</state>
-		<!--The list of transitions.-->
-		<transition>
-			<from>0</from>
-			<to>1</to>
-			<read>0</read>
-		</transition>
-		<transition>
-			<from>0</from>
-			<to>1</to>
-			<read>1</read>
-		</transition>
-		<transition>
-			<from>2</from>
-			<to>3</to>
-			<read>0</read>
-		</transition>
-		<transition>
-			<from>1</from>
-			<to>2</to>
-			<read>1</read>
-		</transition>
-		<transition>
-			<from>3</from>
-			<to>0</to>
-			<read>1</read>
-		</transition>
-		<transition>
-			<from>3</from>
-			<to>0</to>
-			<read>0</read>
-		</transition>
-	</automaton>
-</structure>
+Examples
+========
+The Github page for this plugin has a directory called
+This plugin comes with an examples.py file which contains three examples to get started.
+
+You can run each file using these commands:
+
+* manim -pql examples.py FiniteStateAutomatonExample
+* manim -pql examples.py NonFiniteStateAutomatonExample
+* manim -pql examples.py PushDownAutomatonExample
+
+
+Writing Custom Animations
+=========================
+Create a new file called custom_manim_animations.py (can be called anything).
+In this file write:
+```python
+import Manim
+from manim_automata import ManimAnimations
+
+class CustomManimAnimations(ManimAnimations):
+    
+    def __init__(self) -> None:
+        super().__init__()
+
 ```
 
+In your manim-automaton file create an instance of your new custom manim animations class, like so:
+
+```python
+import Manim
+from .custom_manim_animations import CustomManimAnimations
+
+class Automaton(MovingCameraScene):
+    def construct(self):
+        manim_animations_instance = CustomManimAnimations()
+
+        manim_automaton = ManimAutomaton(xml_file='example_machine.jff', manim_animations=manim_animations_instance)
+        ...
+```
+
+Now that everything is setup, if you'll be able to override the methods in ManimAnimations in your own class.
+Go to the github repository of this projcet
