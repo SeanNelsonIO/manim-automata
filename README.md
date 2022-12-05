@@ -41,7 +41,7 @@ How To Use
 ```python
 class Automaton(MovingCameraScene):
     def construct(self):
-        manim_automaton = ManimAutomaton(xml_file='example_machine.jff')
+        manim_automaton = ManimAutomaton(xml_file='your_jff_file.jff')
         
         #Adjust camera frame to fit ManimAutomaton in scene
         self.camera.frame_width = manim_automaton.width + 10
@@ -75,8 +75,7 @@ run with -pqh instead of -pql to have highquality version
 
 Examples
 ========
-The Github page for this plugin has a directory called
-This plugin comes with an examples.py file which contains three examples to get started.
+The Github page for this plugin has a directory called manim_automata_examples. You can download these and play around with them.
 
 You can run each file using these commands:
 
@@ -114,5 +113,5 @@ class Automaton(MovingCameraScene):
         ...
 ```
 
-Now that everything is setup, if you'll be able to override the methods in ManimAnimations in your own class.
-Go to the github repository of this projcet
+Now that everything is setup, you'll be able to override the methods in ManimAnimations in your own class.
+Go to the github repository of this project, then to custom_animations_help to find a file that has all the animation methods that can be overriden.
