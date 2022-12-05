@@ -1,4 +1,4 @@
-from manim import FadeToColor, RED, BLUE, WHITE, YELLOW
+from manim import Transform, FadeToColor, RED, BLUE, WHITE, YELLOW, FadeIn
 
 
 class ManimAnimations():
@@ -26,9 +26,22 @@ class ManimAnimations():
 
 
     #input animations
-    
+    def animate_input_token_spent(self, token):
+        return token.animate.set_opacity(0.5)
+
+    def animate_highlight_input_token(self, token):
+        return FadeToColor(token, color=YELLOW)
+
+    def animate_display_input(self, input):
+        return FadeIn(input)
 
     #subscript animations
+    def animate_transform_to_new_subscript_object(self, initial_subscript, new_subscript):
+        return Transform(initial_subscript, new_subscript)
 
+
+
+    
+    #generic
 
 

@@ -161,20 +161,9 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         
     def construct_automaton_input(self, input_string: str) -> "ManimAutomataInput":
         return ManimAutomataInput(input_string, animation_style=self.animation_style)
-        
-    #returns a list of animations to run through
-    # @abc.abstractmethod
-    # def play_string(self, input: Union[str,"ManimAutomataInput"]) -> list:
-    #     """Documentation TODO"""
-    #     return
-    
-    # @abc.abstractmethod
-    # def step(self, manim_transition: ManimTransition, token: "Tex", state_pointer: State, result: bool) -> list:
-    #     """Documentation TODO"""
-    #     return
+
         
     def set_default_position_of_input_string(self):
-        list_of_input_string_animations = []
         #get centre of self
         c1 = self.get_x()
         c2 = self.get_y()
@@ -319,7 +308,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
             #position the mobject
             self.set_default_position_of_input_string()
             #display manim_automaton_input to the screen
-            list_of_animations.append(FadeIn(self.manim_automata_input))
+            list_of_animations.append(self.manim_animations.animate_display_input(self.manim_automata_input))
         else: self.manim_automata_input = input #if input is already an instance of ManimAutomataInput
 
         #run the input through the machine, returning a history of what happend
@@ -357,7 +346,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
 
                 #animate the token highlight
                 list_of_animations.append(
-                    [ManimAutomataInput.highlight_token(token, self.animation_style)]
+                    [self.manim_animations.animate_highlight_input_token(token)]
                 )
 
                 for step_history in iteration_history:
@@ -368,10 +357,10 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
                 if animate_subscripts == True:
                     list_of_animations.append(self.animate_subscripts(iteration_history))
                     
-
+                
                 #animate the token fades
                 list_of_animations.append(
-                    [token.animate.set_opacity(0.5)]
+                    [self.manim_animations.animate_input_token_spent(token)]
                 )
 
         #generate outcome animations
@@ -400,7 +389,9 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         new_subscript_object = Tex(1, color=YELLOW)
         new_subscript_object.set_x(initial_state.subscript.get_x())
         new_subscript_object.set_y(initial_state.subscript.get_y())
-        return [FadeToColor(initial_state, color=YELLOW), Transform(initial_state.subscript, new_subscript_object)]
+        
+        return [self.manim_animations.animate_highlight_state(initial_state),
+                self.manim_animations.animate_transform_to_new_subscript_object(initial_state.subscript, new_subscript_object)]
 
 
     def generate_accept_animations(self):
@@ -462,7 +453,6 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
 
                     state_animations = state_animations + [self.manim_animations.animate_highlight_state(x) for x in next_neighbour_states]
             
-                
 
             deactivate_transition_animation = [self.manim_animations.animate_transition_to_default_color(x) for x in manim_transitions]
         
@@ -497,18 +487,18 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
                         
                 # state_counter.setdefault(state.id, 1)
                 # state_counter[state.id] = state_counter[state.id] + 1
-    
+        
         for state in self.states:
             if state.id in state_counter:
                 new_subscript_object = Tex(state_counter[state.id], color=YELLOW)
                 new_subscript_object.set_x(state.subscript.get_x())
                 new_subscript_object.set_y(state.subscript.get_y())
-                animations.append(Transform(state.subscript, new_subscript_object))
+                animations.append(self.manim_animations.animate_transform_to_new_subscript_object(state.subscript,  new_subscript_object))
             else: 
                 new_subscript_object = Tex(0, color=BLUE)
                 new_subscript_object.set_x(state.subscript.get_x())
                 new_subscript_object.set_y(state.subscript.get_y())
-                animations.append(Transform(state.subscript, new_subscript_object))
+                animations.append(self.manim_animations.animate_transform_to_new_subscript_object(state.subscript,  new_subscript_object))
         
         return animations
 
