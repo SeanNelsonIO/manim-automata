@@ -5,7 +5,7 @@ from manim_automata import *
          
 class PushDownAutomatonExample(MovingCameraScene):
     def construct(self):
-        manim_pushdown_automaton = ManimPushDownAutomaton(xml_file='example_machines/pushdown_automaton.jff')
+        manim_pushdown_automaton = ManimPushDownAutomaton(xml_file='example_machine_files/pushdown_automaton.jff')
     
         #Adjust camera frame to fit ManimAutomaton in scene
         self.camera.frame_width = manim_pushdown_automaton.width + 10
@@ -30,7 +30,7 @@ class PushDownAutomatonExample(MovingCameraScene):
 
 class FiniteStateAutomatonExample(MovingCameraScene):
     def construct(self):
-        manim_automaton = ManimDeterminsticFiniteAutomaton(xml_file='example_machines/finite_automaton.jff', cli=False)
+        manim_automaton = ManimDeterminsticFiniteAutomaton(xml_file='example_machine_files/finite_automaton.jff', cli=False)
         
     
         #Adjust camera frame to fit ManimAutomaton in scene
@@ -57,7 +57,7 @@ class FiniteStateAutomatonExample(MovingCameraScene):
 
 class NonFiniteStateAutomatonExample(MovingCameraScene):
     def construct(self):
-        manim_automaton = ManimDeterminsticFiniteAutomaton(xml_file='example_machines/NFA.jff', cli=False)
+        manim_automaton = ManimDeterminsticFiniteAutomaton(xml_file='example_machine_files/NFA.jff', cli=False)
         
     
         #Adjust camera frame to fit ManimAutomaton in scene

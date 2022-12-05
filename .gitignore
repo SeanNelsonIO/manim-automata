@@ -1,5 +1,5 @@
 media/
 dist/
 
-example.py
-example_machine.jff
+dev_example.py
+dev_custom_manim_animations.py
