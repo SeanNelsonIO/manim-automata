@@ -1,9 +1,9 @@
-from re import S
 from manim import *
 from .automata_dependencies.automata import FiniteStateAutomaton
 from .manim_state import ManimState, State
 from .manim_automaton_input import ManimAutomataInput
 from .manim_transition import ManimTransition
+from .manim_animations import ManimAnimations
 
 from .manim_cli import ManimAutomataCLI
 
@@ -59,11 +59,15 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         pass
     """
 
-    def __init__(self, json_template=None, xml_file=None, camera_follow=False, animation_style=default_animation_style, cli=False, **kwargs) -> None:
+    def __init__(self, json_template=None, xml_file=None, camera_follow=False, animation_style=default_animation_style, manim_animations=None, cli=False, **kwargs) -> None:
         FiniteStateAutomaton.__init__(self)
 
         self.animation_style = animation_style
         self.camera_follow = camera_follow
+
+
+        if manim_animations is None: #if user doesn't provide their own class set to default
+            self.manim_animations = ManimAnimations()
 
         self.cli = None
         if cli:
@@ -280,6 +284,12 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         if self.nda_builder:
             self.export_recorded_path_to_file()
 
+        #add information about whether the input was accepted
+        global_history["information"] = {
+            "state_pointers": state_pointers,
+            "automaton_result": self.check_automaton_result(state_pointers),
+        }
+
         return global_history
 
     def generate_next_state_options(self, state_pointer, transitions):
@@ -426,9 +436,10 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
             state_died_animation = []
             state_revert_back_to_default_animation = []
 
-            state_died_animation.append(FadeToColor(state_pointer, color=RED))
+            # state_died_animation.append(FadeToColor(state_pointer, color=RED))
+            state_died_animation.append(self.manim_animations.animate_dead_branch_state(state_pointer))
 
-            state_revert_back_to_default_animation.append(FadeToColor(state_pointer, color=BLUE))
+            state_revert_back_to_default_animation.append(self.manim_animations.animate_state_to_default_color(state_pointer))
 
             list_of_step_animations.append(
                 state_died_animation
@@ -439,7 +450,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
 
 
         else:
-            activate_transition_animation = [transition.animate_transition(step_result) for transition in manim_transitions]
+            activate_transition_animation = [self.manim_animations.animate_highlight_transition(x) for x in manim_transitions]
 
             #if successful point to the next state
             state_animations = []
@@ -447,13 +458,13 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
             if step_result is True:
                 
                 if len(next_neighbour_states) > 0:
-                    state_animations.append(FadeToColor(state_pointer, color=BLUE))
+                    state_animations.append(self.manim_animations.animate_state_to_default_color(state_pointer))
 
-                    state_animations = state_animations + [FadeToColor(x, color=YELLOW) for x in next_neighbour_states]
+                    state_animations = state_animations + [self.manim_animations.animate_highlight_state(x) for x in next_neighbour_states]
             
                 
 
-            deactivate_transition_animation = [FadeToColor(transition, color=WHITE) for transition in manim_transitions]
+            deactivate_transition_animation = [self.manim_animations.animate_transition_to_default_color(x) for x in manim_transitions]
         
             #add the animations in the correct order
             list_of_step_animations.append(
@@ -501,12 +512,4 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         
         return animations
 
-
-
-        # for state in self.states:
-        #     self.states.update_subscript()
-
-        #pseudo code
-        # for subscripts in self.subscripts:
-        #     subscripts.update(number_of_branches_on_state)
         
