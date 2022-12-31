@@ -1,9 +1,5 @@
 from manim import *
-
-from src.manim_automata.mobjects.manim_pushdown_automaton import ManimPushDownAutomaton
-from src.manim_automata.mobjects.manim_determinstic_finite_state_automaton import ManimDeterminsticFiniteAutomaton
-
-        
+from manim_automata import *
 
 class FiniteStateAutomatonExample(MovingCameraScene):
     def construct(self):
