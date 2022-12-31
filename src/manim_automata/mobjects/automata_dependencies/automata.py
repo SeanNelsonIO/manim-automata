@@ -85,7 +85,7 @@ class FiniteStateAutomaton():
         for transition in state_transitions:
             #check if any transition's symbols match the input token
             for read_symbol in transition.read_symbols: #Iterate through the transtion's read options
-                if read_symbol.tex_string == token.tex_string:
+                if read_symbol.tex_string == token.tex_string or read_symbol.tex_string == r"\epsilon":
                     next_states.append(transition.transition_to)
                     transitions.append(transition)
 

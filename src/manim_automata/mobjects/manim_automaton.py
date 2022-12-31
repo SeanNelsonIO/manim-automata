@@ -142,6 +142,8 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
             transition_group = transition_counter.setdefault(state_key, [])#if key doesn't exist then create new key list pair
             #if symbol already exists then skip
             if transition['read'] not in transition_group:
+                if transition['read'] == None:
+                    transition['read'] = r"\epsilon"
                 transition_group.append(transition['read']) #append transition read value to transition[state_key]
 
         #avoids creating multiple manim_transitions.
