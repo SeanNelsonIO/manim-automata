@@ -64,7 +64,7 @@ class ManimPushDownAutomaton(ManimNonDeterminsticFiniteAutomaton):
     #returns a list of animations to run through
     #override
     def play_string(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None, accept_on_final_state: bool = True) -> list:
-        return super().play_string(input, automaton_path_name, stack=self.stack, accept_on_final_state=self.accept_on_final_state)
+        return super().play_string(input, automaton_path_name, stack=self.stack, accept_on_final_state=accept_on_final_state)
 
     #pushdown automata can accept if the stack is empty or if it falls on a final state
 

@@ -40,7 +40,7 @@ class FiniteStateAutomatonExample(MovingCameraScene):
         self.camera.frame.move_to(manim_automaton)
 
         #Create an mobject version of input for the manim_automaton
-        automaton_input = manim_automaton.construct_automaton_input("111011")
+        automaton_input = manim_automaton.construct_automaton_input("000001")
 
         #Position automaton_input on the screen to avoid overlapping.
         automaton_input.shift(LEFT * 2)
