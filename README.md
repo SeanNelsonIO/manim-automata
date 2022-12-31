@@ -2,7 +2,7 @@ MANIM AUTOMATA
 ==============
 A Manim plugin that allows you to generate scenes with Finite State Machines and their inputs. The plugin will automatically generate these animations with minimal setup from the user.
 
-This plugin has been funded by the University of Leeds.
+This plugin is funded by the University of Leeds.
 
 YOUTUBE VIDEO EXAMPLE
 =====================

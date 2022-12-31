@@ -270,11 +270,12 @@ class ManimPushDownAutomatonTransition(ManimTransition):
         transition_from: ManimState,
         transition_to: ManimState,
         rules: list,
+        parent_automaton: "ManimAutomaton",
         animation_style: dict,
         font_size = 100,
+        buffer = 1,
         **kwargs
     ) -> None:
-
         Transition.__init__(self, transition_from, transition_to)
         self.circle = None
         #manim settings for animations and colors
@@ -284,10 +285,12 @@ class ManimPushDownAutomatonTransition(ManimTransition):
         #list of PushDownAutomatonRule
         self.rules = rules
 
+        self.buffer = buffer
+
         #create manim read symbols for transitition
         for rule in rules:
             #Create mobjects of read_symbol
-            self.read_symbols.append(MathTex(rule.__str__, font_size=font_size))
+            self.read_symbols.append(MathTex(rule.__str__(), font_size=font_size))
         
         if self.transition_from == self.transition_to: #create transition that points to itself
             position_1, position_2 = self.calculate_circle_vertices()
@@ -302,7 +305,7 @@ class ManimPushDownAutomatonTransition(ManimTransition):
 
         else: #transition_from ----> transition_to
             self.arrow = Arrow(transition_from, transition_to, buff=0)
-            self.position_text() #- this is causing errors
+            self.position_text(self.buffer) #- this is causing errors
 
       
         VGroup.__init__(self, self.arrow, *self.read_symbols, **kwargs)

@@ -4,7 +4,42 @@ from src.manim_automata.mobjects.manim_pushdown_automaton import ManimPushDownAu
 from src.manim_automata.mobjects.manim_determinstic_finite_state_automaton import ManimDeterminsticFiniteAutomaton
 
          
-class PushDownAutomatonExample(MovingCameraScene):
+
+
+class StackAnimation(MovingCameraScene):
+    def construct(self):
+        # manim_pushdown_automaton = ManimPushDownAutomaton(xml_file='manim_automata_examples/example_machine_files/pushdown_automaton.jff')
+    
+        # #Adjust camera frame to fit ManimAutomaton in scene
+        # self.camera.frame_width = manim_pushdown_automaton.width + 10
+        # self.camera.frame_height = manim_pushdown_automaton.height + 10
+        # self.camera.frame.move_to(manim_pushdown_automaton)
+
+        # #Create an mobject version of input for the manim_automaton
+        # automaton_input = manim_pushdown_automaton.construct_automaton_input("110011")
+
+        # #Position automaton_input on the screen to avoid overlapping.
+        # automaton_input.shift(LEFT * 2)
+        # automaton_input.shift(UP * 10)
+
+        # self.play(
+        #     DrawBorderThenFill(manim_pushdown_automaton),
+        #     FadeIn(automaton_input)
+        # )
+
+
+        # for sequence in manim_pushdown_automaton.play_string(automaton_input):
+        #     self.play(*sequence, run_time=0.5)
+
+        # manim_object = mbonect
+
+
+        # self.camera.frame.move_to(manim_object)
+        pass
+
+
+
+class PushdownAutomatonExample(MovingCameraScene):
     def construct(self):
         manim_pushdown_automaton = ManimPushDownAutomaton(xml_file='manim_automata_examples/example_machine_files/pushdown_automaton.jff')
     
@@ -24,6 +59,7 @@ class PushDownAutomatonExample(MovingCameraScene):
             DrawBorderThenFill(manim_pushdown_automaton),
             FadeIn(automaton_input)
         )
+
 
         for sequence in manim_pushdown_automaton.play_string(automaton_input):
             self.play(*sequence, run_time=0.5)

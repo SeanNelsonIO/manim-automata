@@ -3,7 +3,7 @@ from manim import *
 from .manim_non_determinstic_finite_state_automaton import ManimNonDeterminsticFiniteAutomaton
 from .manim_state import ManimState, State
 from .manim_automaton_input import ManimAutomataInput
-from .manim_transition import ManimTransition
+from .manim_transition import ManimTransition, ManimPushDownAutomatonTransition
 
 from typing import Union
 
@@ -49,7 +49,7 @@ class ManimPushDownAutomaton(ManimNonDeterminsticFiniteAutomaton):
             self.construct_transition(transition_from, transition_to, rules)
 
     def construct_transition(self, transition_from: ManimState, transition_to: ManimState, rules: list):
-        new_transition = ManimTransition(transition_from, transition_to, rules, parent_automaton=self, animation_style=self.animation_style)
+        new_transition = ManimPushDownAutomatonTransition(transition_from, transition_to, rules, parent_automaton=self, animation_style=self.animation_style)
         self.transitions.append(new_transition)
         #add the transition to the from_states link list
         transition_from.add_transition_to_state(new_transition)
@@ -61,12 +61,70 @@ class ManimPushDownAutomaton(ManimNonDeterminsticFiniteAutomaton):
     def pop(self):
         return self.stack.pop()
 
-    #returns a list of animations to run through
-    #override
+    #pushdown automata can accept if the stack is empty or if it falls on a final state TODO
+    #overriden
     def play_string(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None, accept_on_final_state: bool = True) -> list:
-        return super().play_string(input, automaton_path_name, stack=self.stack, accept_on_final_state=accept_on_final_state)
+        if type(input) is str:
+            #create mobject of input string
+            self.manim_automata_input = self.construct_automaton_input(input)
+            #position the mobject
+            self.set_default_position_of_input_string()
+            #display manim_automaton_input to the screen
+            list_of_animations.append(self.manim_animations.animate_display_input(self.manim_automata_input))
+        else: self.manim_automata_input = input #if input is already an instance of ManimAutomataInput
 
-    #pushdown automata can accept if the stack is empty or if it falls on a final state
+        #run the input through the machine, returning a history of what happend
+        history = self.run_input_through_automaton(input)
+
+        list_of_animations = self.generate_history_animations(history)
+
+                    # if self.check_automaton_result([state_pointer]): #if the automaton has an active accepting state
+                    #     list_of_animations.append(self.generate_accept_animations()) #THIS IS GENERATED BEFORE ALL BRANCHES HAVE FINISHED
+                    # else: #if there is no final state then the machine is not accepted.
+                    #     list_of_animations.append(self.generate_reject_animations())
+
+        return list_of_animations
+
+
+    #overriden
+    def automaton_step(self, token: str, state_pointer: State) -> tuple:
+        next_states = [] #stores all of the next states that can be jumped to
+        transitions = [] #store the transitions that transition from current to next states.
+        
+        #go through each transition of this state
+        state_transitions = state_pointer.get_transitions()
+        for transition in state_transitions:
+
+
+            #check if any transition's rules match the input token
+            for rule in transition.rules: #Iterate through the transtion's read options
+                if rule.read_symbol == token.tex_string or rule.read_symbol == r"\epsilon":
+                    next_states.append(transition.transition_to)
+                    transitions.append(transition)
+
+                    #some code for stack too - TODO
+
+
+        if len(next_states) != 0:
+            return True, next_states, transitions #the token matches the transition's input
+
+        return False, next_states, transitions #There are no other transitions/ reachable next states given the token
+
+    #nondeterministic pushdown automata have difference stacks - maybe a later requirement? Probably
+
+    #the only difference in history is that we have a stack
+    #check to see if the transition matches the input token
+    #if not - fail
+    #if true then execute the transition rule
+    #update stack
+
+    # transition.rules has each rule
+
+    #change the way we generate animations / add the animations needed for stack, push and pop
+    #need to probably animate which transition rule it takes too
+
+
+    
 
 
 
@@ -92,9 +150,8 @@ class PushDownAutomatonRule():
                 self.push.append(push_item)
 
     def __str__(self) -> str:
-
         formatted_push_string = ''.join(str(x) for x in self.push)
-        return f'{self.read_symbol};{self.pop};{formatted_push_string}'
+        return f'{self.read_symbol},{self.pop};{formatted_push_string}'
 
 
 

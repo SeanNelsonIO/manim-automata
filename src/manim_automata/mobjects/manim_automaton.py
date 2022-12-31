@@ -242,7 +242,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
 
         return next_states, sequence_result
               
-   #Implement branching in this method
+
     def run_input_through_automaton(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None) -> list:
         """
         parameters:
