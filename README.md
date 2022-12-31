@@ -7,6 +7,7 @@ This plugin has been funded by the University of Leeds.
 YOUTUBE VIDEO EXAMPLE
 =====================
 [![Finite State Machine in Manim](https://img.youtube.com/vi/beKkjIGdeQc/0.jpg)](https://youtu.be/beKkjIGdeQc)
+[![Nondeterminstic Finite State Machine in Manim](https://img.youtube.com/vi/woaldsYmsHM/0.jpg)](https://youtu.be/woaldsYmsHM)
 
 Notes
 =====
