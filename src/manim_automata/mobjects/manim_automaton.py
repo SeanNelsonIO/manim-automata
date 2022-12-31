@@ -225,6 +225,12 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
                     next_states = next_states + next_neighbour_states
             
             
+        #if all state_pointers steps fail then automaton failed
+        sequence_result = False
+        for iteration in iteration_history:
+            if iteration["result"] == True:
+                sequence_result = True
+                break
 
             # if len(next_neighbour_states) == 0: #if there are no more states or transitions left
             #     if self.check_automaton_result(state_pointers): #if the automaton has an active accepting state
@@ -232,7 +238,7 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
             #     else: #if there is no final state then the machine is not accepted.
             #         list_of_animations.append(self.generate_reject_animations())
 
-        return next_states
+        return next_states, sequence_result
               
    #Implement branching in this method
     def run_input_through_automaton(self, input: Union[str, "ManimAutomataInput"], automaton_path_name: str = None) -> list:
@@ -262,13 +268,17 @@ class ManimAutomaton(FiniteStateAutomaton, VGroup, abc.ABC):
         for i, token in enumerate(input.tokens):
             iteration_history = []
 
-            state_pointers = self.run_sequence(token, state_pointers, iteration_history) #goes through each state_pointer
+            state_pointers, sequence_result = self.run_sequence(token, state_pointers, iteration_history) #goes through each state_pointer
 
-
+            
             global_history[token.id] = {
                 "token": token,
                 "iteration_history": iteration_history
             }
+
+            #if the input token failed then cancel input loop early
+            if sequence_result == False:
+                break
         
         #export the recorded path so the user can use it again without using nda builder
         if self.nda_builder:
